@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import {
   BadgeCheck,
-  Camera,
   Check,
   ChevronDown,
   ChevronRight,
@@ -25,7 +24,6 @@ import {
   Upload,
   User,
   WandSparkles,
-  Zap,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -121,11 +119,11 @@ const STYLE_KEYWORDS = [
 ];
 
 const PRESETS: { id: StylePreset; label: string; accent: string }[] = [
-  { id: "portrait", label: "Portrait", accent: "from-cyan-300 to-blue-400" },
-  { id: "editorial", label: "Editorial", accent: "from-pink-300 to-rose-400" },
+  { id: "portrait", label: "Portrait", accent: "from-[#F6D57A] to-[#D4AF37]" },
+  { id: "editorial", label: "Editorial", accent: "from-[#D4AF37] to-[#8B6F2F]" },
   { id: "cinematic", label: "Cinematic", accent: "from-amber-300 to-red-400" },
-  { id: "concept_art", label: "Concept", accent: "from-violet-300 to-purple-400" },
-  { id: "anime", label: "Anime", accent: "from-fuchsia-300 to-pink-400" },
+  { id: "concept_art", label: "Concept", accent: "from-[#8B6F2F] to-[#F6D57A]" },
+  { id: "anime", label: "Anime", accent: "from-[#F6D57A] to-[#5A451C]" },
 ];
 
 const SECTIONS = [
@@ -135,10 +133,10 @@ const SECTIONS = [
 ] as const;
 
 type StudioSection = (typeof SECTIONS)[number]["id"];
-type ReferenceSlot = "face" | "body" | "style";
+type ReferenceSlot = "face" | "body" | "style" | "outfit";
 type ReferenceState = Record<ReferenceSlot, string | null>;
 
-const EMPTY_REFERENCES: ReferenceState = { face: null, body: null, style: null };
+const EMPTY_REFERENCES: ReferenceState = { face: null, body: null, style: null, outfit: null };
 const DEFAULT_FACE_LOCK = 0.82;
 
 const BLANK: Omit<Character, "id" | "createdAt"> = {
@@ -170,13 +168,8 @@ function seedToHex(seed: number): string {
 }
 
 function seedToDnaColors(seed: number): string[] {
-  return [
-    `hsl(${seed % 360}, 74%, 58%)`,
-    `hsl(${(seed >> 8) % 360}, 72%, 54%)`,
-    `hsl(${(seed >> 16) % 360}, 78%, 62%)`,
-    `hsl(${(seed >> 4) % 360}, 66%, 48%)`,
-    `hsl(${(seed >> 12) % 360}, 84%, 66%)`,
-  ];
+  const palette = ["#F6D57A", "#D4AF37", "#8B6F2F", "#C9A84B", "#5A451C"];
+  return palette.map((_, index) => palette[(index + (seed % palette.length)) % palette.length]);
 }
 
 function characterPrompt(character: Omit<Character, "id" | "createdAt"> | Character) {
@@ -198,12 +191,12 @@ function GlassPanel({ children, className }: { children: ReactNode; className?: 
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[44px] border border-white/[0.16] bg-white/[0.062] shadow-[inset_0_1px_0_rgba(255,255,255,0.20),inset_0_-1px_0_rgba(255,255,255,0.045),0_46px_150px_rgba(0,0,0,0.52),0_0_120px_rgba(168,85,247,0.08)] backdrop-blur-3xl before:pointer-events-none before:absolute before:inset-x-14 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/75 before:to-transparent after:pointer-events-none after:absolute after:inset-y-8 after:left-0 after:w-px after:bg-gradient-to-b after:from-transparent after:via-cyan-100/20 after:to-transparent",
+        "relative overflow-hidden rounded-[44px] border border-[#F6D57A]/18 bg-[#060606]/80 shadow-[inset_0_1px_0_rgba(246,213,122,0.16),inset_0_-1px_0_rgba(246,213,122,0.04),0_46px_150px_rgba(0,0,0,0.58),0_0_92px_rgba(212,175,55,0.08)] backdrop-blur-3xl before:pointer-events-none before:absolute before:inset-x-14 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[#F6D57A]/70 before:to-transparent after:pointer-events-none after:absolute after:inset-y-8 after:left-0 after:w-px after:bg-gradient-to-b after:from-transparent after:via-[#D4AF37]/24 after:to-transparent",
         className
       )}
     >
-      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-cyan-300/[0.06] blur-3xl" />
-      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-fuchsia-400/[0.07] blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-[#D4AF37]/[0.055] blur-3xl" />
+      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-[#8B6F2F]/[0.08] blur-3xl" />
       <div className="relative">{children}</div>
     </section>
   );
@@ -241,6 +234,7 @@ export const CharacterStudio = () => {
   const [generating, setGenerating] = useState(false);
   const [faceLockStrength, setFaceLockStrength] = useState([DEFAULT_FACE_LOCK]);
   const [bodyReferenceLock, setBodyReferenceLock] = useState(true);
+  const [seedLocked, setSeedLocked] = useState(true);
   const [references, setReferences] = useState<ReferenceState>(EMPTY_REFERENCES);
   const [previewImageReady, setPreviewImageReady] = useState(false);
   const [previewResetKey, setPreviewResetKey] = useState("new-character");
@@ -302,6 +296,7 @@ export const CharacterStudio = () => {
     setReferences(EMPTY_REFERENCES);
     setFaceLockStrength([DEFAULT_FACE_LOCK]);
     setBodyReferenceLock(true);
+    setSeedLocked(true);
     setPreviewImageReady(false);
     setPreviewResetKey(activeCharacter.id);
 
@@ -347,7 +342,9 @@ export const CharacterStudio = () => {
       setDraftIsDirty(true);
       setPreviewImageReady(false);
       setReferences((current) => ({ ...current, [slot]: dataUrl }));
-      toast.success(`${slot === "face" ? "Face" : slot === "body" ? "Full body" : "Style"} reference locked`);
+      const slotLabel =
+        slot === "face" ? "Anchor face" : slot === "body" ? "Full body" : slot === "style" ? "Style" : "Wardrobe";
+      toast.success(`${slotLabel} reference locked`);
     });
   };
 
@@ -364,6 +361,7 @@ export const CharacterStudio = () => {
         references.face ? `FaceLock reference strength ${faceLockValue.toFixed(2)}` : "",
         references.body && bodyReferenceLock ? "body reference lock enabled" : "",
         references.style ? "style reference image enabled" : "",
+        references.outfit ? "wardrobe anchor enabled" : "",
       ]
         .filter(Boolean)
         .join(", ");
@@ -413,7 +411,7 @@ export const CharacterStudio = () => {
     const character: Character = { ...form, id: crypto.randomUUID(), createdAt: Date.now() };
     addCharacter(character);
     setActiveCharacter(character.id);
-    toast.success(`${character.name} matched and locked`, {
+    toast.success(`${character.name} Character DNA locked`, {
       description: `FaceLock ${faceLockValue.toFixed(2)} · Seed ${character.seed}`,
     });
 
@@ -426,16 +424,53 @@ export const CharacterStudio = () => {
   const handleForgeImages = async () => {
     if (activeCharacter && !draftIsDirty) {
       setActiveTab("images");
+      toast.success("Character DNA sent to Image Studio", {
+        description: `${activeCharacter.name} is staged as the active identity lock.`,
+      });
       return;
     }
 
     const character = await lockCharacter();
-    if (character) setActiveTab("images");
+    if (character) {
+      setActiveTab("images");
+      toast.success("Character DNA sent to Image Studio");
+    }
+  };
+
+  const handleSendToScene = async () => {
+    if (activeCharacter && !draftIsDirty) {
+      setActiveTab("scene");
+      toast.success("Character DNA sent to Scene Builder", {
+        description: `${activeCharacter.name} is staged for storyboard continuity.`,
+      });
+      return;
+    }
+
+    const character = await lockCharacter();
+    if (character) {
+      setActiveTab("scene");
+      toast.success("Character DNA sent to Scene Builder");
+    }
+  };
+
+  const handleRescanIdentity = () => {
+    if (!activeCharacter && !form.name.trim() && !form.description.trim() && referenceCount === 0) {
+      toast.info("Identity scan needs input", {
+        description: "Upload references or complete the identity deck before rescanning.",
+      });
+      return;
+    }
+
+    setPreviewImageReady(false);
+    window.setTimeout(() => setPreviewImageReady(Boolean(activeCharacter?.portraitDataUrl)), 260);
+    toast.success("Identity scan refreshed", {
+      description: "Local FaceLock, canon proof, seed memory, and reference state recalculated.",
+    });
   };
 
   const handleCopyPrompt = async () => {
     const copied = await copyToClipboard(prompt);
-    if (copied) toast.success("Character prompt copied");
+    if (copied) toast.success("DNA prompt copied");
     else toast.error("Clipboard unavailable");
   };
 
@@ -452,6 +487,7 @@ export const CharacterStudio = () => {
     setReferences(EMPTY_REFERENCES);
     setFaceLockStrength([DEFAULT_FACE_LOCK]);
     setBodyReferenceLock(true);
+    setSeedLocked(true);
     setActiveCharacter(character.id);
   };
 
@@ -462,6 +498,7 @@ export const CharacterStudio = () => {
     setReferences(EMPTY_REFERENCES);
     setFaceLockStrength([DEFAULT_FACE_LOCK]);
     setBodyReferenceLock(true);
+    setSeedLocked(true);
     setPreviewImageReady(false);
     setPreviewResetKey("new-character");
     setActiveSection("identity");
@@ -469,17 +506,40 @@ export const CharacterStudio = () => {
   };
 
   return (
-    <div className="flex-1 overflow-hidden bg-[#070914] text-white">
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_15%_7%,rgba(0,212,255,0.20),transparent_31%),radial-gradient(circle_at_84%_9%,rgba(168,85,247,0.30),transparent_30%),radial-gradient(circle_at_54%_96%,rgba(192,38,211,0.20),transparent_36%),radial-gradient(circle_at_48%_38%,rgba(255,255,255,0.035),transparent_28%),linear-gradient(180deg,#0B1224,#05060B)]" />
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.014)_1px,transparent_1px)] bg-[size:92px_92px] opacity-28" />
+    <div className="axs-dna-lab flex-1 overflow-hidden bg-[#050505] text-white">
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_16%_8%,rgba(246,213,122,0.14),transparent_31%),radial-gradient(circle_at_86%_8%,rgba(139,111,47,0.18),transparent_30%),radial-gradient(circle_at_54%_96%,rgba(212,175,55,0.08),transparent_36%),radial-gradient(circle_at_48%_38%,rgba(255,255,255,0.026),transparent_28%),linear-gradient(180deg,#050505,#090909_48%,#050505)]" />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(rgba(246,213,122,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(246,213,122,0.032)_1px,transparent_1px)] bg-[size:92px_92px] opacity-25" />
 
-      <div className="relative z-10 px-6 py-12 lg:px-14 2xl:px-16">
-        <main className="mx-auto grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-          <div className="min-w-0 space-y-10">
+      <div className="relative z-10 px-4 py-7 sm:px-6 lg:px-8 2xl:px-10">
+        <header className="mb-5 rounded-[34px] border border-[#F6D57A]/20 bg-black/50 p-6 shadow-[inset_0_1px_0_rgba(246,213,122,0.13),0_26px_92px_rgba(0,0,0,0.46)] backdrop-blur-2xl">
+          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-4 py-2 text-xs font-black uppercase tracking-[0.24em] text-[#F6D57A]">
+                <ScanFace className="size-4" />
+                AXS Identity Laboratory
+              </div>
+              <h1 className="mt-4 text-4xl font-black tracking-tight text-white md:text-5xl">Character DNA</h1>
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-white/58">
+                Run a cinematic identity assay: face geometry, body profile, style markers, wardrobe anchors, and canon-safe memory across every scene, image, and campaign.
+              </p>
+            </div>
+            <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {["Genome Lock", "Canon Protected", "FaceLock Assay", "Style Markers Synced"].map((badge) => (
+                <div key={badge} className="rounded-full border border-[#F6D57A]/22 bg-[#D4AF37]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#F6D57A]">
+                  {badge}
+                </div>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto grid gap-5 2xl:grid-cols-[minmax(320px,0.92fr)_minmax(420px,1.12fr)_minmax(320px,0.92fr)]">
+          <div className="min-w-0 space-y-5">
             <FaceLockHero
               references={references}
               faceLockStrength={faceLockArray(faceLockStrength)}
               bodyReferenceLock={bodyReferenceLock}
+              seedLocked={seedLocked}
               lockLabel={lockLabel}
               lockGlow={lockGlow}
               generating={generating}
@@ -494,17 +554,18 @@ export const CharacterStudio = () => {
                 setPreviewImageReady(false);
                 setBodyReferenceLock((value) => !value);
               }}
+              onToggleSeedLock={() => setSeedLocked((value) => !value)}
               onLock={lockCharacter}
             />
 
             <GlassPanel className="p-8">
               <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-100/50">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-[#F6D57A]/60">
                     <Dna className="size-4" />
-                    Character DNA Builder
+                    Identity Deck
                   </div>
-                  <h2 className="mt-3 text-4xl font-black tracking-tight text-white lg:text-5xl">Identity control deck</h2>
+                  <h2 className="mt-3 text-3xl font-black tracking-tight text-white">Canon profile builder</h2>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <ProofBadge label="DNA Proof" score={proof.categories.identity.score} status={proof.categories.identity.status} />
                     <ProofBadge label="Continuity" score={proof.categories.continuity.score} status={proof.categories.continuity.status} />
@@ -514,8 +575,8 @@ export const CharacterStudio = () => {
                       className={cn(
                         "rounded-full border px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] transition",
                         nsfwEnabled
-                          ? "border-fuchsia-300/45 bg-fuchsia-400/15 text-fuchsia-100 shadow-[0_0_22px_rgba(217,70,239,0.18)]"
-                          : "border-white/10 bg-white/[0.035] text-white/45 hover:border-fuchsia-300/30 hover:text-fuchsia-100"
+                          ? "border-[#F6D57A]/42 bg-[#D4AF37]/14 text-[#F6D57A] shadow-[0_0_22px_rgba(212,175,55,0.16)]"
+                          : "border-white/10 bg-white/[0.035] text-white/45 hover:border-[#F6D57A]/30 hover:text-[#F6D57A]"
                       )}
                     >
                       {nsfwEnabled ? "NSFW DNA Enabled" : "Enable NSFW DNA"}
@@ -547,7 +608,7 @@ export const CharacterStudio = () => {
                       className={cn(
                         "flex items-center justify-center gap-2 rounded-[20px] px-3 py-2.5 text-[11px] font-black transition",
                         activeSection === id
-                          ? "bg-cyan-100 text-black shadow-[0_0_32px_rgba(0,212,255,0.18)]"
+                          ? "bg-[#F6D57A] text-black shadow-[0_0_32px_rgba(212,175,55,0.22)]"
                           : "text-white/48 hover:bg-white/[0.06] hover:text-white"
                       )}
                     >
@@ -627,8 +688,8 @@ export const CharacterStudio = () => {
                     exit={{ opacity: 0, x: -12 }}
                     className="space-y-8"
                   >
-                    <TagCloud title="Personality traits" tags={PERSONALITY_TAGS} active={form.personality} onToggle={togglePersonality} accent="cyan" />
-                    <TagCloud title="Visual style keywords" tags={STYLE_KEYWORDS} active={form.styleKeywords} onToggle={toggleStyle} accent="violet" />
+                    <TagCloud title="Personality traits" tags={PERSONALITY_TAGS} active={form.personality} onToggle={togglePersonality} accent="primary" />
+                    <TagCloud title="Visual style keywords" tags={STYLE_KEYWORDS} active={form.styleKeywords} onToggle={toggleStyle} accent="secondary" />
                     <Field label="Default style preset">
                       <div className="mt-4 grid gap-4 sm:grid-cols-5">
                         {PRESETS.map((preset) => {
@@ -640,7 +701,7 @@ export const CharacterStudio = () => {
                               onClick={() => updateForm({ stylePreset: preset.id })}
                               className={cn(
                                 "relative overflow-hidden rounded-[26px] border px-4 py-5 text-left transition",
-                                active ? "border-white/30 bg-white/[0.09] shadow-[0_0_30px_rgba(168,85,247,0.12)]" : "border-white/[0.11] bg-black/26 hover:border-white/24"
+                                active ? "border-[#F6D57A]/34 bg-[#D4AF37]/10 shadow-[0_0_30px_rgba(212,175,55,0.16)]" : "border-white/[0.11] bg-black/26 hover:border-[#F6D57A]/24"
                               )}
                             >
                               {active && <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", preset.accent)} />}
@@ -665,7 +726,7 @@ export const CharacterStudio = () => {
                       <div className="rounded-[34px] border border-white/[0.12] bg-black/28 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                       <div className="mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm font-black text-white">
-                          <Dna className="size-4 text-violet-200" />
+                          <Dna className="size-4 text-[#F6D57A]" />
                           Character DNA Fingerprint
                         </div>
                         <div className="font-mono text-xs font-bold text-white/42">{seedHex}</div>
@@ -711,7 +772,7 @@ export const CharacterStudio = () => {
                       key={section.id}
                       type="button"
                       onClick={() => setActiveSection(section.id)}
-                      className={cn("h-2 rounded-full transition", activeSection === section.id ? "w-7 bg-cyan-200" : "w-2 bg-white/20 hover:bg-white/40")}
+                      className={cn("h-2 rounded-full transition", activeSection === section.id ? "w-7 bg-[#F6D57A]" : "w-2 bg-white/20 hover:bg-white/40")}
                     />
                   ))}
                 </div>
@@ -719,12 +780,12 @@ export const CharacterStudio = () => {
                   type="button"
                   onClick={activeSection === "seed" ? lockCharacter : nextSection}
                   disabled={generating}
-                  className="h-14 rounded-full bg-white px-7 text-sm font-black text-black shadow-[0_0_28px_rgba(255,255,255,0.10)] hover:bg-cyan-100"
+                  className="h-14 rounded-full bg-gradient-to-r from-[#F6D57A] to-[#D4AF37] px-7 text-sm font-black text-black shadow-[0_0_32px_rgba(212,175,55,0.22)] hover:brightness-110"
                 >
                   {activeSection === "seed" ? (
                     <>
                       <Lock className="size-4" />
-                      Lock Character
+                      Lock Character DNA
                     </>
                   ) : (
                     <>
@@ -737,7 +798,7 @@ export const CharacterStudio = () => {
             </GlassPanel>
           </div>
 
-          <div className="space-y-16">
+          <div className="min-w-0 space-y-5">
             <LivePreview
               character={previewCharacter}
               activeCharacter={draftIsDirty ? null : activeCharacter}
@@ -751,16 +812,20 @@ export const CharacterStudio = () => {
               referenceCount={referenceCount}
               generating={generating}
               onCopyPrompt={handleCopyPrompt}
-              onForgeImages={handleForgeImages}
-              onRegenerate={() => activeCharacter && generatePortrait(activeCharacter, true)}
+              onSendToImages={handleForgeImages}
+              onSendToScene={handleSendToScene}
+              onRescanIdentity={handleRescanIdentity}
             />
+          </div>
 
+          <div className="min-w-0 space-y-5">
             <CharacterContinuityLab
               character={previewCharacter}
               dnaColors={dnaColors}
               faceLockStrength={faceLockValue}
               bodyReferenceLock={bodyReferenceLock}
               referenceCount={referenceCount}
+              prompt={prompt}
             />
 
             {characters.length > 0 && (
@@ -771,7 +836,7 @@ export const CharacterStudio = () => {
                     <h3 className="mt-2 text-3xl font-black text-white">Locked character vault</h3>
                     <div className="mt-1 text-sm font-semibold text-white/42">{characters.length} production-ready DNA profile{characters.length === 1 ? "" : "s"}</div>
                   </div>
-                  <BadgeCheck className="size-5 text-cyan-100/58" />
+                  <BadgeCheck className="size-5 text-[#F6D57A]/66" />
                 </div>
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   {characters.map((character) => {
@@ -785,7 +850,7 @@ export const CharacterStudio = () => {
                         onClick={() => selectLockedCharacter(character)}
                         className={cn(
                           "group relative overflow-hidden rounded-[30px] border text-left transition",
-                          active ? "border-cyan-200/55 shadow-[0_0_46px_rgba(0,212,255,0.20)]" : "border-white/[0.11] hover:border-white/26"
+                          active ? "border-[#F6D57A]/55 shadow-[0_0_46px_rgba(212,175,55,0.20)]" : "border-white/[0.11] hover:border-[#F6D57A]/26"
                         )}
                       >
                         <div className="aspect-[3/4] bg-black">
@@ -807,7 +872,7 @@ export const CharacterStudio = () => {
                           ))}
                         </div>
                         {active && (
-                          <div className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-cyan-200 text-black">
+                          <div className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-[#F6D57A] text-black">
                             <Check className="size-4" />
                           </div>
                         )}
@@ -861,89 +926,86 @@ function FaceLockHero({
   references,
   faceLockStrength,
   bodyReferenceLock,
+  seedLocked,
   lockLabel,
   lockGlow,
   generating,
   onUpload,
   onStrengthChange,
   onToggleBodyLock,
+  onToggleSeedLock,
   onLock,
 }: {
   references: ReferenceState;
   faceLockStrength: number[];
   bodyReferenceLock: boolean;
+  seedLocked: boolean;
   lockLabel: string;
   lockGlow: string;
   generating: boolean;
   onUpload: (slot: ReferenceSlot, file?: File) => void;
   onStrengthChange: (value: number[]) => void;
   onToggleBodyLock: () => void;
+  onToggleSeedLock: () => void;
   onLock: () => void;
 }) {
   const faceLockValue = normalizeFaceLockValue(faceLockStrength);
   const sliderValue = faceLockArray(faceLockValue);
 
   return (
-    <GlassPanel className="rounded-[52px] p-8 lg:p-9">
-      <div className="grid gap-8 xl:grid-cols-[0.78fr_1.22fr]">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-200/14 bg-fuchsia-300/[0.07] px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-fuchsia-100/64 shadow-[0_0_34px_rgba(192,38,211,0.12)]">
-            <ScanFace className="size-4" />
-            IP-Adapter / FaceLock
-          </div>
-          <h1 className="mt-6 text-5xl font-black tracking-tight text-white lg:text-6xl">
-            Lock the face. Keep the magic.
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/58">
-            Upload reference frames, tune identity strength, preserve body silhouette, and lock a reusable Character DNA profile for every scene, image, and universe.
-          </p>
+    <GlassPanel className="rounded-[34px] p-0">
+      <div className="relative overflow-hidden rounded-[34px]">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(246,213,122,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(246,213,122,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-35" />
+        <div className="pointer-events-none absolute -right-20 top-4 size-64 rounded-full border border-[#F6D57A]/12 bg-[#D4AF37]/[0.045] blur-2xl" />
 
-          <div className="mt-7 rounded-[34px] border border-white/[0.13] bg-black/32 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_24px_80px_rgba(0,0,0,0.28)]">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-black text-white">FaceLock strength</div>
-                <div className="mt-1 text-xs font-semibold text-white/44">{lockLabel}</div>
+        <div className="relative border-b border-[#F6D57A]/12 bg-gradient-to-r from-black via-[#100d05]/82 to-black px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#F6D57A]">
+                <ScanFace className="size-3.5" />
+                Specimen Intake Bay
               </div>
-              <motion.div
-                key={lockGlow}
-                initial={{ scale: 0.92, opacity: 0.55 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="rounded-full border border-cyan-200/24 bg-cyan-300/[0.12] px-4 py-2 text-sm font-black text-cyan-50 shadow-[0_0_34px_rgba(0,212,255,0.18)]"
-              >
-                {faceLockValue.toFixed(2)}
-              </motion.div>
+              <h2 className="mt-4 text-2xl font-black tracking-tight text-white">Genetic identity assay</h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-white/52">
+                Load visual specimens, measure identity strength, and seal the canon genome before AXS commits this profile to persistent Character DNA memory.
+              </p>
             </div>
-            <Slider value={sliderValue} onValueChange={(value) => onStrengthChange(faceLockArray(value))} min={0} max={1} step={0.01} className="mt-6" />
-            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.08]">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-200 via-violet-300 to-fuchsia-300 shadow-[0_0_24px_rgba(168,85,247,0.35)]"
-                animate={{ width: lockGlow }}
-                transition={{ type: "spring", stiffness: 180, damping: 24 }}
-              />
+            <div className="hidden shrink-0 rounded-[22px] border border-[#F6D57A]/18 bg-black/42 p-3 shadow-[inset_0_1px_0_rgba(246,213,122,0.10)] sm:block">
+              <div className="flex size-16 items-center justify-center rounded-full border border-[#F6D57A]/28 bg-[#D4AF37]/10 shadow-[0_0_36px_rgba(212,175,55,0.20)]">
+                <DnaHelix compact />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
+        <div className="relative grid gap-5 p-6">
+          <div className="grid gap-3 sm:grid-cols-4">
+            <LabStatPill label="Genome ID" value="LOCAL" />
+            <LabStatPill label="Assay" value={`${Math.round(faceLockValue * 100)}%`} />
+            <LabStatPill label="Specimens" value={`${Object.values(references).filter(Boolean).length}/4`} />
+            <LabStatPill label="Canon" value={bodyReferenceLock && seedLocked ? "SEALED" : "DRAFT"} />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
             {([
-              ["face", "Face", "Primary identity", ScanFace],
-              ["body", "Full Body", "Silhouette lock", User],
-              ["style", "Style", "Lighting memory", ImageIcon],
+              ["face", "Face Sample", "Geometry marker", ScanFace],
+              ["body", "Body Sample", "Silhouette marker", User],
+              ["style", "Style Sample", "Aesthetic marker", ImageIcon],
+              ["outfit", "Wardrobe Sample", "Costume marker", Layers3],
             ] as const).map(([slot, label, hint, Icon]) => (
               <label
                 key={slot}
                 className={cn(
-                  "group relative flex min-h-56 cursor-pointer flex-col justify-between overflow-hidden rounded-[34px] border p-5 transition duration-300",
+                  "group relative flex min-h-36 cursor-pointer flex-col justify-between overflow-hidden rounded-[24px] border p-4 transition duration-300",
                   references[slot]
-                    ? "border-cyan-200/32 bg-cyan-300/[0.075] shadow-[0_0_42px_rgba(0,212,255,0.16)]"
-                    : "border-dashed border-white/[0.16] bg-black/30 hover:border-white/30 hover:bg-white/[0.055]"
+                    ? "border-[#F6D57A]/42 bg-[#D4AF37]/12 shadow-[0_0_42px_rgba(212,175,55,0.16)]"
+                    : "border-[#F6D57A]/14 bg-[#080808]/72 hover:border-[#F6D57A]/32 hover:bg-[#D4AF37]/[0.055]"
                 )}
               >
                 {references[slot] ? (
                   <img src={references[slot] ?? ""} alt={`${label} reference`} className="absolute inset-0 size-full object-cover opacity-58 transition group-hover:scale-105" />
                 ) : (
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.10),transparent_34%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(246,213,122,0.10),transparent_34%),linear-gradient(135deg,rgba(246,213,122,0.05),transparent_45%)]" />
                 )}
                 <input
                   type="file"
@@ -951,35 +1013,80 @@ function FaceLockHero({
                   className="sr-only"
                   onChange={(event) => onUpload(slot, event.target.files?.[0])}
                 />
-                <div className="relative flex size-12 items-center justify-center rounded-[22px] border border-white/12 bg-black/46 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_18px_44px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+                <div className="relative flex size-11 items-center justify-center rounded-[18px] border border-[#F6D57A]/16 bg-black/58 text-[#F6D57A] shadow-[inset_0_1px_0_rgba(246,213,122,0.12),0_18px_44px_rgba(0,0,0,0.22)] backdrop-blur-xl">
                   <Icon className="size-5" />
                 </div>
                 <div className="relative">
                   <div className="text-base font-black text-white">{label}</div>
-                  <div className="mt-1 text-xs font-semibold text-white/46">{references[slot] ? "Reference active" : hint}</div>
+                  <div className="mt-1 text-xs font-semibold text-white/46">{references[slot] ? "Specimen active" : hint}</div>
                 </div>
               </label>
             ))}
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_230px]">
+          <div className="rounded-[26px] border border-[#F6D57A]/16 bg-black/46 p-5 shadow-[inset_0_1px_0_rgba(246,213,122,0.10)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-sm font-black text-white">FaceLock assay strength</div>
+                <div className="mt-1 text-xs font-semibold text-white/42">{lockLabel}</div>
+              </div>
+              <motion.div
+                key={lockGlow}
+                initial={{ scale: 0.92, opacity: 0.55 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="rounded-full border border-[#F6D57A]/28 bg-[#D4AF37]/12 px-4 py-2 text-sm font-black text-[#F6D57A] shadow-[0_0_34px_rgba(212,175,55,0.18)]"
+              >
+                {faceLockValue.toFixed(2)}
+              </motion.div>
+            </div>
+            <Slider value={sliderValue} onValueChange={(value) => onStrengthChange(faceLockArray(value))} min={0} max={1} step={0.01} className="mt-5" />
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/[0.08]">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-[#8B6F2F] via-[#D4AF37] to-[#F6D57A] shadow-[0_0_24px_rgba(212,175,55,0.35)]"
+                animate={{ width: lockGlow }}
+                transition={{ type: "spring", stiffness: 180, damping: 24 }}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3">
             <button
               type="button"
               onClick={onToggleBodyLock}
               className={cn(
-                "flex items-center justify-between gap-4 rounded-[30px] border p-5 text-left transition",
-                bodyReferenceLock ? "border-cyan-200/24 bg-cyan-300/[0.08]" : "border-white/[0.10] bg-black/26"
+                "flex items-center justify-between gap-4 rounded-[28px] border p-4 text-left transition",
+                bodyReferenceLock ? "border-[#F6D57A]/28 bg-[#D4AF37]/10" : "border-white/[0.10] bg-black/26"
               )}
             >
               <div className="flex items-center gap-3">
-                <ShieldCheck className={cn("size-5", bodyReferenceLock ? "text-cyan-100" : "text-white/40")} />
+                <ShieldCheck className={cn("size-5", bodyReferenceLock ? "text-[#F6D57A]" : "text-white/40")} />
                 <div>
-                  <div className="text-sm font-black text-white">Body Reference Lock</div>
+                  <div className="text-sm font-black text-white">Body Marker Lock</div>
                   <div className="text-xs text-white/40">Preserve silhouette, posture, wardrobe proportions.</div>
                 </div>
               </div>
-              <span className={cn("relative h-8 w-16 rounded-full border transition", bodyReferenceLock ? "border-cyan-200/30 bg-cyan-300/30" : "border-white/12 bg-white/[0.06]")}>
+              <span className={cn("relative h-8 w-16 rounded-full border transition", bodyReferenceLock ? "border-[#F6D57A]/34 bg-[#D4AF37]/28" : "border-white/12 bg-white/[0.06]")}>
                 <span className={cn("absolute top-1 size-6 rounded-full bg-white shadow-[0_0_18px_rgba(255,255,255,0.32)] transition", bodyReferenceLock ? "left-9" : "left-1")} />
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggleSeedLock}
+              className={cn(
+                "flex items-center justify-between gap-4 rounded-[28px] border p-4 text-left transition",
+                seedLocked ? "border-[#F6D57A]/28 bg-[#D4AF37]/10" : "border-white/[0.10] bg-black/26"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <Dna className={cn("size-5", seedLocked ? "text-[#F6D57A]" : "text-white/40")} />
+                <div>
+                  <div className="text-sm font-black text-white">Genome Seed Lock</div>
+                  <div className="text-xs text-white/40">Keep the same identity fingerprint across outputs.</div>
+                </div>
+              </div>
+              <span className={cn("relative h-8 w-16 rounded-full border transition", seedLocked ? "border-[#F6D57A]/34 bg-[#D4AF37]/28" : "border-white/12 bg-white/[0.06]")}>
+                <span className={cn("absolute top-1 size-6 rounded-full bg-white shadow-[0_0_18px_rgba(255,255,255,0.32)] transition", seedLocked ? "left-9" : "left-1")} />
               </span>
             </button>
 
@@ -987,15 +1094,53 @@ function FaceLockHero({
               type="button"
               onClick={onLock}
               disabled={generating}
-              className="h-full min-h-24 rounded-[30px] bg-gradient-to-r from-cyan-200 via-violet-300 to-fuchsia-300 text-base font-black text-black shadow-[0_0_64px_rgba(168,85,247,0.44)] hover:brightness-110"
+              className="min-h-16 rounded-[28px] bg-gradient-to-r from-[#F6D57A] to-[#D4AF37] text-base font-black text-black shadow-[0_0_64px_rgba(212,175,55,0.28)] hover:brightness-110"
             >
               {generating ? <Sparkles className="size-4 animate-pulse" /> : <Lock className="size-4" />}
-              Match & Lock
+              Lock Character DNA
             </Button>
           </div>
         </div>
       </div>
     </GlassPanel>
+  );
+}
+
+function LabStatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[18px] border border-[#F6D57A]/14 bg-black/44 px-3 py-3 shadow-[inset_0_1px_0_rgba(246,213,122,0.08)]">
+      <div className="text-[9px] font-black uppercase tracking-[0.16em] text-white/30">{label}</div>
+      <div className="mt-1 truncate font-mono text-xs font-black text-[#F6D57A]">{value}</div>
+    </div>
+  );
+}
+
+function DnaHelix({ compact = false }: { compact?: boolean }) {
+  const rows = compact ? 6 : 11;
+  return (
+    <div className={cn("relative flex flex-col justify-between", compact ? "h-12 w-9" : "h-32 w-20")}>
+      {Array.from({ length: rows }).map((_, index) => {
+        const offset = Math.sin(index * 0.9);
+        const left = 34 + offset * 18;
+        const right = 66 - offset * 18;
+        return (
+          <div key={index} className="relative h-2">
+            <span
+              className="absolute top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-[#F6D57A]/54 to-transparent"
+              style={{ left: `${Math.min(left, right)}%`, right: `${100 - Math.max(left, right)}%` }}
+            />
+            <span
+              className="absolute top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-[#F6D57A] shadow-[0_0_12px_rgba(246,213,122,0.55)]"
+              style={{ left: `${left}%` }}
+            />
+            <span
+              className="absolute top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-[#8B6F2F] shadow-[0_0_10px_rgba(212,175,55,0.35)]"
+              style={{ left: `${right}%` }}
+            />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1012,8 +1157,9 @@ function LivePreview({
   referenceCount,
   generating,
   onCopyPrompt,
-  onForgeImages,
-  onRegenerate,
+  onSendToImages,
+  onSendToScene,
+  onRescanIdentity,
 }: {
   character: Omit<Character, "id" | "createdAt"> | Character;
   activeCharacter: Character | null;
@@ -1027,36 +1173,44 @@ function LivePreview({
   referenceCount: number;
   generating: boolean;
   onCopyPrompt: () => void;
-  onForgeImages: () => void;
-  onRegenerate: () => void;
+  onSendToImages: () => void;
+  onSendToScene: () => void;
+  onRescanIdentity: () => void;
 }) {
   const safeFaceLockStrength = normalizeFaceLockValue(faceLockStrength);
 
   return (
-    <GlassPanel className="sticky top-24 rounded-[56px] p-9 lg:p-10">
+    <GlassPanel className="rounded-[42px] p-6 lg:p-7">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-100/52">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-[#F6D57A]/72">
             <Eye className="size-4" />
-            Live Preview
+            Bio Scan Chamber
           </div>
-          <h2 className="mt-3 text-5xl font-black tracking-tight text-white lg:text-6xl">
-            {character.name || (activeCharacter ? activeCharacter.name : "New Character Preview")}
+          <h2 className="mt-3 text-4xl font-black tracking-tight text-white">
+            {character.name || (activeCharacter ? activeCharacter.name : "No locked identity yet")}
           </h2>
         </div>
         <Button
           type="button"
           onClick={onCopyPrompt}
-          className="rounded-full border border-white/12 bg-white/[0.08] px-4 text-sm font-black text-white hover:bg-white hover:text-black"
+          className="rounded-full border border-[#F6D57A]/18 bg-[#D4AF37]/10 px-4 text-sm font-black text-[#F6D57A] hover:bg-[#F6D57A] hover:text-black"
         >
           <Copy className="size-4" />
-          Copy Prompt
+          Copy DNA Prompt
         </Button>
       </div>
 
-      <div className="mt-9 grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-black/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_72px_rgba(0,0,0,0.40)]">
-          <div className="aspect-[6/7]">
+      <div className="mt-7 grid gap-5">
+        <div className="relative overflow-hidden rounded-[34px] border border-[#F6D57A]/22 bg-black/54 shadow-[inset_0_1px_0_rgba(246,213,122,0.11),0_24px_72px_rgba(0,0,0,0.42),0_0_70px_rgba(212,175,55,0.10)]">
+          <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(rgba(246,213,122,0.08)_1px,transparent_1px)] bg-[size:100%_42px] opacity-35" />
+          <div className="pointer-events-none absolute left-5 top-5 z-10 rounded-full border border-[#F6D57A]/18 bg-black/44 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#F6D57A]/76">
+            assay scan
+          </div>
+          <div className="pointer-events-none absolute right-5 top-5 z-10 rounded-full border border-[#F6D57A]/18 bg-black/44 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#F6D57A]/76">
+            genome memory
+          </div>
+          <div className="aspect-[5/6]">
             {activeCharacter?.portraitDataUrl && previewImageReady ? (
               <motion.img
                 key={previewResetKey}
@@ -1072,26 +1226,26 @@ function LivePreview({
                 key={`${previewResetKey}-${character.name}-${character.heritage}-${safeFaceLockStrength}-${bodyReferenceLock}`}
                 initial={{ opacity: 0.84 }}
                 animate={{ opacity: 1 }}
-                className="flex size-full items-center justify-center bg-[radial-gradient(circle_at_50%_22%,rgba(0,212,255,0.18),transparent_26%),radial-gradient(circle_at_50%_58%,rgba(168,85,247,0.24),transparent_36%),linear-gradient(145deg,#070B14,#030406)]"
+                className="flex size-full items-center justify-center bg-[radial-gradient(circle_at_50%_22%,rgba(246,213,122,0.16),transparent_26%),radial-gradient(circle_at_50%_58%,rgba(139,111,47,0.22),transparent_36%),linear-gradient(145deg,#090806,#020202)]"
               >
                 <div className="text-center">
                   <motion.div
-                    animate={{ boxShadow: `0 0 ${38 + safeFaceLockStrength * 52}px rgba(0,212,255,${0.10 + safeFaceLockStrength * 0.18})` }}
-                    className="mx-auto flex size-32 items-center justify-center rounded-[38px] border border-white/[0.14] bg-white/[0.065] backdrop-blur-2xl"
+                    animate={{ boxShadow: `0 0 ${38 + safeFaceLockStrength * 52}px rgba(212,175,55,${0.10 + safeFaceLockStrength * 0.18})` }}
+                    className="mx-auto flex size-40 items-center justify-center rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/[0.075] backdrop-blur-2xl"
                   >
-                    <Camera className="size-12 text-white/58" />
+                    <DnaHelix />
                   </motion.div>
                   <div className="mt-7 text-2xl font-black text-white">
                     {activeCharacter?.portraitDataUrl && !previewImageReady
                       ? "Loading selected character"
                       : character.name
                         ? lockLabel
-                        : "Ready for Character DNA"}
+                        : "No genome locked yet"}
                   </div>
                   <div className="mx-auto mt-3 max-w-md text-sm leading-7 text-white/44">
                     {activeCharacter?.portraitDataUrl && !previewImageReady
                       ? "Clearing the previous preview and preparing this character's portrait."
-                      : character.description || "Start with a name, description, or reference image and this preview will respond instantly."}
+                      : character.description || "Load visual specimens or complete the identity deck to generate a persistent Character DNA profile."}
                   </div>
                 </div>
               </motion.div>
@@ -1103,9 +1257,9 @@ function LivePreview({
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-                  className="mx-auto size-14 rounded-full border-2 border-cyan-200 border-t-transparent"
+                  className="mx-auto size-14 rounded-full border-2 border-[#F6D57A] border-t-transparent"
                 />
-                <div className="mt-4 text-sm font-black text-white">Forging portrait...</div>
+                <div className="mt-4 text-sm font-black text-white">Scanning identity...</div>
               </div>
             </div>
           )}
@@ -1116,9 +1270,9 @@ function LivePreview({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="rounded-[34px] border border-white/[0.12] bg-black/28 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Prompt Memory</div>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
+          <div className="rounded-[28px] border border-[#F6D57A]/14 bg-black/30 p-5 shadow-[inset_0_1px_0_rgba(246,213,122,0.08)]">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Genome Prompt Memory</div>
             <p className="mt-3 max-h-56 overflow-y-auto text-sm leading-7 text-white/58">
               {prompt || "Start typing identity details to build the character prompt."}
             </p>
@@ -1126,32 +1280,51 @@ function LivePreview({
           <div className="grid gap-3">
             <Metric label="Heritage" value={character.heritage} />
             <Metric label="Body" value={character.bodyType} />
-            <Metric label="FaceLock" value={safeFaceLockStrength.toFixed(2)} />
-            <Metric label="References" value={`${referenceCount}/3 active`} />
-            <Metric label="Body Lock" value={bodyReferenceLock ? "Enabled" : "Off"} />
+            <Metric label="Face Assay" value={safeFaceLockStrength.toFixed(2)} />
+            <Metric label="Specimens" value={`${referenceCount}/4 active`} />
+            <Metric label="Body Marker" value={bodyReferenceLock ? "Locked" : "Off"} />
           </div>
         </div>
       </div>
 
-      <div className="mt-9 grid gap-4 md:grid-cols-[1fr_260px]">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <Button
           type="button"
-          onClick={onForgeImages}
+          onClick={onSendToImages}
           disabled={generating}
-          className="h-24 rounded-full bg-gradient-to-r from-cyan-200 via-violet-300 to-fuchsia-300 text-xl font-black text-black shadow-[0_0_90px_rgba(168,85,247,0.54)] hover:brightness-110"
+          className="h-16 rounded-[24px] bg-gradient-to-r from-[#F6D57A] to-[#D4AF37] text-sm font-black text-black shadow-[0_0_54px_rgba(212,175,55,0.30)] hover:brightness-110"
         >
-          <Zap className="size-5" />
-          Forge Images Now
+          <ImageIcon className="size-4" />
+          Send to Image Studio
         </Button>
         <Button
           type="button"
           variant="outline"
-          disabled={!activeCharacter || generating}
-          onClick={onRegenerate}
-          className="h-24 rounded-full border-white/12 bg-white/[0.065] px-6 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white hover:text-black"
+          disabled={generating}
+          onClick={onSendToScene}
+          className="h-16 rounded-[24px] border-[#F6D57A]/16 bg-[#D4AF37]/[0.065] px-6 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(246,213,122,0.08)] hover:bg-[#F6D57A] hover:text-black"
+        >
+          <Layers3 className="size-4" />
+          Send to Scene Builder
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={generating}
+          onClick={onRescanIdentity}
+          className="h-16 rounded-[24px] border-[#F6D57A]/16 bg-white/[0.04] px-6 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(246,213,122,0.08)] hover:bg-white hover:text-black"
         >
           <RefreshCw className="size-4" />
-          Re-forge Portrait
+          Re-scan Identity
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCopyPrompt}
+          className="h-16 rounded-[24px] border-[#F6D57A]/16 bg-white/[0.04] px-6 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(246,213,122,0.08)] hover:bg-white hover:text-black"
+        >
+          <Copy className="size-4" />
+          Copy DNA Prompt
         </Button>
       </div>
     </GlassPanel>
@@ -1164,65 +1337,79 @@ function CharacterContinuityLab({
   faceLockStrength,
   bodyReferenceLock,
   referenceCount,
+  prompt,
 }: {
   character: Omit<Character, "id" | "createdAt"> | Character;
   dnaColors: string[];
   faceLockStrength: number;
   bodyReferenceLock: boolean;
   referenceCount: number;
+  prompt: string;
 }) {
   const poses = ["Stand", "Walk", "Sit", "Action", "Interact"];
   const expressions = ["Neutral", "Happy", "Sad", "Angry", "Surprised", "Worried"];
   const audit = [
-    ["Face geometry", faceLockStrength >= 0.78 ? "Locked" : "Needs stronger lock"],
-    ["Body silhouette", bodyReferenceLock ? "Preserved" : "Optional"],
-    ["Reference slots", `${referenceCount}/3 active`],
-    ["Seed memory", String(character.seed)],
+    ["Face geometry assay", faceLockStrength >= 0.78 ? "Locked" : "Missing"],
+    ["Body marker assay", bodyReferenceLock ? "Preserved" : "Missing"],
+    ["Wardrobe marker", referenceCount >= 4 ? "Locked" : "Incomplete"],
+    ["Expression phenotype", "Mapped"],
+    ["Specimen slots", `${referenceCount}/4 active`],
+    ["Genome seed", String(character.seed)],
+    ["Canon seal", faceLockStrength >= 0.78 && bodyReferenceLock ? "Protected" : "Draft"],
   ];
 
   return (
     <GlassPanel className="p-7">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-cyan-100/46">Identity Workspace</div>
-          <h3 className="mt-2 text-3xl font-black text-white">Anchor sheet + continuity audit</h3>
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#F6D57A]/66">Genome Proof Matrix</div>
+          <h3 className="mt-2 text-3xl font-black text-white">Canon-safe genotype</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">
-            This turns a character from a prompt into a production asset: anchor pose, expression range, FaceLock strength, body lock, and reusable DNA memory.
+            Biometric proof cards, phenotype slots, expression range, FaceLock assay, body marker lock, and reusable DNA memory.
           </p>
         </div>
-        <div className="rounded-full border border-cyan-200/20 bg-cyan-200/10 px-4 py-2 text-xs font-black text-cyan-50">
+        <div className="rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-4 py-2 text-xs font-black text-[#F6D57A]">
           {faceLockStrength >= 0.78 ? "Production ready" : "Draft DNA"}
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="grid gap-3">
-          <div className="grid grid-cols-5 gap-2">
-            {poses.map((pose, index) => (
-              <div key={pose} className="min-h-28 rounded-[24px] border border-white/[0.10] bg-black/26 p-3">
-                <div className="h-12 rounded-2xl" style={{ background: `linear-gradient(135deg, ${dnaColors[index % dnaColors.length]}, rgba(255,255,255,0.08))` }} />
-                <div className="mt-3 text-xs font-black text-white">{pose}</div>
-                <div className="mt-1 text-[10px] font-semibold text-white/34">pose slot</div>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
-            {expressions.map((expression, index) => (
-              <div key={expression} className="rounded-[20px] border border-white/[0.10] bg-white/[0.035] px-3 py-3 text-center">
-                <div className="mx-auto size-7 rounded-full" style={{ backgroundColor: dnaColors[index % dnaColors.length] }} />
-                <div className="mt-2 text-[11px] font-black text-white/72">{expression}</div>
+      <div className="space-y-5">
+        <div className="rounded-[28px] border border-[#F6D57A]/14 bg-black/28 p-5">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Genome Prompt Memory</div>
+          <p className="mt-3 max-h-36 overflow-y-auto text-sm leading-7 text-white/56">
+            {prompt || "No prompt memory yet. Complete the identity deck to create persistent DNA."}
+          </p>
+        </div>
+
+        <div className="rounded-[30px] border border-[#F6D57A]/12 bg-black/24 p-5">
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-white/34">Assay Checklist</div>
+          <div className="mt-4 grid gap-3">
+            {audit.map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between gap-3 rounded-[20px] border border-white/[0.08] bg-white/[0.035] px-4 py-3">
+                <span className="text-xs font-bold text-white/45">{label}</span>
+                <span className="max-w-[160px] truncate text-xs font-black text-[#F6D57A]/86">{value}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-white/[0.10] bg-black/24 p-5">
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-white/34">Continuity Checklist</div>
-          <div className="mt-4 space-y-3">
-            {audit.map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between gap-3 rounded-[20px] border border-white/[0.08] bg-white/[0.035] px-4 py-3">
-                <span className="text-xs font-bold text-white/45">{label}</span>
-                <span className="max-w-[160px] truncate text-xs font-black text-cyan-50/78">{value}</span>
+        <div className="grid gap-3">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Phenotype Sheet</div>
+          <div className="grid grid-cols-5 gap-2">
+            {poses.map((pose, index) => (
+              <div key={pose} className="min-h-24 rounded-[22px] border border-[#F6D57A]/12 bg-black/30 p-3">
+                <div className="h-12 rounded-2xl" style={{ background: `linear-gradient(135deg, ${dnaColors[index % dnaColors.length]}, rgba(255,255,255,0.08))` }} />
+                <div className="mt-3 text-xs font-black text-white">{pose}</div>
+                <div className="mt-1 text-[10px] font-semibold text-white/34">marker slot</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Expression Phenotype Grid</div>
+          <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+            {expressions.map((expression, index) => (
+              <div key={expression} className="rounded-[20px] border border-[#F6D57A]/12 bg-white/[0.035] px-3 py-3 text-center">
+                <div className="mx-auto size-7 rounded-full" style={{ backgroundColor: dnaColors[index % dnaColors.length] }} />
+                <div className="mt-2 text-[11px] font-black text-white/72">{expression}</div>
               </div>
             ))}
           </div>
@@ -1259,7 +1446,7 @@ function HeritagePicker({
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            className="absolute left-0 right-0 top-[calc(100%+10px)] z-40 overflow-hidden rounded-[24px] border border-white/[0.14] bg-[#070A12]/96 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_28px_90px_rgba(0,0,0,0.54)] backdrop-blur-2xl"
+                  className="absolute left-0 right-0 top-[calc(100%+10px)] z-40 overflow-hidden rounded-[24px] border border-[#F6D57A]/18 bg-[#070706]/96 p-3 shadow-[inset_0_1px_0_rgba(246,213,122,0.14),0_28px_90px_rgba(0,0,0,0.54)] backdrop-blur-2xl"
           >
             <div className="flex items-center gap-2 rounded-[18px] border border-white/[0.10] bg-black/34 px-3">
               <Search className="size-4 text-white/34" />
@@ -1282,7 +1469,7 @@ function HeritagePicker({
                   }}
                   className={cn(
                     "flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left text-sm font-bold transition",
-                    heritage === value ? "bg-cyan-200 text-black" : "text-white/62 hover:bg-white/[0.06] hover:text-white"
+                    heritage === value ? "bg-[#F6D57A] text-black" : "text-white/62 hover:bg-white/[0.06] hover:text-white"
                   )}
                 >
                   {heritage}
@@ -1330,7 +1517,7 @@ function TagCloud({
   tags: string[];
   active: string[];
   onToggle: (tag: string) => void;
-  accent: "cyan" | "violet";
+  accent: "primary" | "secondary";
 }) {
   return (
     <div>
@@ -1346,10 +1533,10 @@ function TagCloud({
               className={cn(
                 "rounded-full border px-3.5 py-2 text-xs font-bold transition",
                 selected
-                  ? accent === "cyan"
-                    ? "border-cyan-200/44 bg-cyan-300/[0.13] text-cyan-50 shadow-[0_0_18px_rgba(0,212,255,0.16)]"
-                    : "border-violet-200/44 bg-violet-300/[0.13] text-violet-50 shadow-[0_0_18px_rgba(168,85,247,0.16)]"
-                  : "border-white/10 bg-white/[0.025] text-white/46 hover:border-white/24 hover:text-white"
+                  ? accent === "primary"
+                    ? "border-[#F6D57A]/44 bg-[#D4AF37]/13 text-[#F6D57A] shadow-[0_0_18px_rgba(212,175,55,0.16)]"
+                    : "border-[#F6D57A]/32 bg-[#8B6F2F]/13 text-[#F6D57A]/90 shadow-[0_0_18px_rgba(212,175,55,0.12)]"
+                  : "border-white/10 bg-white/[0.025] text-white/46 hover:border-[#F6D57A]/24 hover:text-white"
               )}
             >
               {tag}

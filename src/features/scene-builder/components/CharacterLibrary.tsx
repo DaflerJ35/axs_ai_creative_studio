@@ -2,6 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { Boxes, ChevronLeft, ChevronRight, Gem, Plus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAxsStore } from "@/store/useAxsStore";
 import { ASSET_ITEMS, CHARACTER_ITEMS, ENVIRONMENT_ITEMS } from "../data/library-items";
 import { useSceneBuilderStore } from "../store/useSceneBuilderStore";
 import type { LibraryTab, SceneLibraryItem } from "../types/scene-builder.types";
@@ -103,6 +104,7 @@ export function CharacterLibrary({
   collapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
 }) {
+  const setActiveTab = useAxsStore((state) => state.setActiveTab);
   return (
     <aside className="flex h-full w-full flex-col border-r border-white/[0.06] bg-[#0F0F10]">
       <div className={cn("flex h-16 shrink-0 items-center border-b border-white/[0.06] px-4", collapsed ? "justify-center" : "justify-between")}>
@@ -136,6 +138,7 @@ export function CharacterLibrary({
         <div className="border-t border-white/[0.06] p-3">
           <button
             type="button"
+            onClick={() => setActiveTab("dna")}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 py-2 text-xs font-bold text-white/54 transition hover:bg-white/[0.06] hover:text-white"
           >
             <Plus className="size-3.5" />

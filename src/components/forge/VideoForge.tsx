@@ -58,7 +58,7 @@ const MOTION_PRESETS = [
     Icon: ArrowRight,
     recommended: true,
     prompt: "slow cinematic dolly push-in toward subject, shallow depth of field, smooth and intentional camera movement",
-    accent: "from-cyan-200 to-blue-300",
+    accent: "from-[#F6D57A] to-[#8B6F2F]",
   },
   {
     id: "orbit_rise",
@@ -66,7 +66,7 @@ const MOTION_PRESETS = [
     sublabel: "Elegant reveal arc",
     Icon: ArrowUpRight,
     prompt: "smooth orbital camera arcing upward while circling the subject, rising reveal, elegant ascending arc motion",
-    accent: "from-violet-200 to-fuchsia-300",
+    accent: "from-[#F6D57A] to-violet-200/60",
   },
   {
     id: "dolly_zoom",
@@ -74,7 +74,7 @@ const MOTION_PRESETS = [
     sublabel: "Perspective tension",
     Icon: SwitchCamera,
     prompt: "hitchcock dolly zoom effect, background perspective shifts while subject stays same size in frame, vertigo effect",
-    accent: "from-pink-200 to-rose-300",
+    accent: "from-[#F6D57A] to-rose-200/55",
   },
   {
     id: "low_hero",
@@ -98,7 +98,7 @@ const MOTION_PRESETS = [
     sublabel: "Controlled circular move",
     Icon: Orbit,
     prompt: "smooth orbital camera movement circling the subject 90 degrees, maintaining focus, elegant arc motion",
-    accent: "from-indigo-200 to-blue-300",
+    accent: "from-[#F6D57A] to-cyan-200/55",
   },
   {
     id: "handheld",
@@ -114,7 +114,7 @@ const MOTION_PRESETS = [
     sublabel: "Scale to subject reveal",
     Icon: ArrowDown,
     prompt: "aerial drone slowly descending and tilting down to reveal subject, sweeping wide-to-close movement, cinematic scale",
-    accent: "from-sky-200 to-cyan-300",
+    accent: "from-[#F6D57A] to-cyan-200/55",
   },
   {
     id: "tracking",
@@ -122,7 +122,7 @@ const MOTION_PRESETS = [
     sublabel: "Parallel motion",
     Icon: ArrowDownRight,
     prompt: "side-tracking camera following subject movement, steady glide, parallel motion, cinematic production",
-    accent: "from-fuchsia-200 to-pink-300",
+    accent: "from-[#F6D57A] to-fuchsia-200/55",
   },
   {
     id: "static",
@@ -158,12 +158,12 @@ function GlassPanel({ children, className }: { children: ReactNode; className?: 
   return (
     <section
       className={cn(
-        "axs-panel axs-panel-corners relative overflow-hidden rounded-2xl border-[var(--axs-border)] bg-[#041018]/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.13),0_26px_90px_rgba(0,0,0,0.48),0_0_42px_rgba(0,212,255,0.06)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-x-10 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[rgba(255,200,87,0.72)] before:to-transparent",
+        "axs-panel axs-panel-corners relative overflow-hidden rounded-2xl border-[var(--axs-gold-border)] bg-[#080808]/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_26px_90px_rgba(0,0,0,0.48),0_0_42px_rgba(212,175,55,0.08)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-x-10 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[rgba(246,213,122,0.72)] before:to-transparent",
         className
       )}
     >
-      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-cyan-300/[0.045] blur-3xl" />
-      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-violet-400/[0.055] blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-[#D4AF37]/[0.05] blur-3xl" />
+      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-[#8B6F2F]/[0.055] blur-3xl" />
       <div className="relative">{children}</div>
     </section>
   );
@@ -285,8 +285,8 @@ export const VideoForge = () => {
         <defs>
           <linearGradient id="videoForgeEnergyLine" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
-            <stop offset="35%" stopColor="#22d3ee" stopOpacity=".75" />
-            <stop offset="70%" stopColor="#a855f7" stopOpacity=".65" />
+            <stop offset="35%" stopColor="#F6D57A" stopOpacity=".70" />
+            <stop offset="70%" stopColor="#D4AF37" stopOpacity=".58" />
             <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
           </linearGradient>
           <filter id="videoForgeGlowLine"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -303,10 +303,23 @@ export const VideoForge = () => {
               <h1 className="mt-3 text-4xl font-black text-white md:text-5xl">Cinematic motion studio</h1>
               <p className="mt-3 max-w-3xl text-slate-300">Generate polished scenes, trailers, ads, and story-driven clips with complete creative control.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {["Quick Start", "Storyboard", "Shot Builder", "Motion Lab", "Character Lock"].map((item) => (
-                <button key={item} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-200">{item}</button>
-              ))}
+          <div className="flex flex-wrap gap-2">
+            {["Quick Start", "Storyboard", "Shot Builder", "Motion Lab", "Character Lock"].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    if (item === "Quick Start") setPrompt("A premium black and gold cinematic studio shot with controlled camera motion, elegant lighting, and strong character continuity.");
+                    if (item === "Storyboard") setActiveTab("scene");
+                    if (item === "Character Lock") setActiveTab("dna");
+                    if (item === "Motion Lab") setMotionPreset("dolly-in");
+                    toast.success(`${item} selected`, { description: "Video Forge updated the local motion workspace." });
+                  }}
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-200"
+                >
+                  {item}
+                </button>
+            ))}
             </div>
           </div>
         </section>
@@ -316,15 +329,15 @@ export const VideoForge = () => {
           <CommandMetric label="Motion preset" value={MOTION_PRESETS.find((preset) => preset.id === motionPreset)?.label ?? "Custom"} delta={`${frameRate} fps`} Icon={SwitchCamera} accent="gold" />
           <CommandMetric label="Proof score" value={`${proof.overallScore}%`} delta={proof.status} Icon={Lock} accent="cyan" />
         </section>
-        <main className="mx-auto grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-          <div className="min-w-0 space-y-8">
-            <GlassPanel className="rounded-[56px] p-10 lg:p-12">
+        <main className="mx-auto grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)] 2xl:grid-cols-[minmax(0,0.94fr)_minmax(32rem,1.06fr)]">
+          <div className="min-w-0 space-y-5">
+            <GlassPanel className="rounded-[34px] p-6 lg:p-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-200/14 bg-fuchsia-300/[0.07] px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-fuchsia-100/64 shadow-[0_0_34px_rgba(192,38,211,0.12)]">
                 <Video className="size-4" />
                 Motion Studio
               </div>
-              <h1 className="mt-7 text-6xl font-black tracking-tight text-white lg:text-8xl">
-                Direct cinematic movement.
+              <h1 className="mt-7 text-[clamp(2.5rem,4.4vw,4.9rem)] font-black leading-[.94] tracking-tight text-white">
+                Director motion studio.
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-white/58">
                 Compose character-consistent video with {workflowProfile.title}, cinematic camera language, physics cues, motion pacing, and locked DNA continuity.
@@ -418,6 +431,9 @@ export const VideoForge = () => {
               <div className="rounded-[28px] border border-amber-300/20 bg-amber-300/[0.06] p-5 text-sm leading-6 text-amber-50/80">
                 <AlertTriangle className="mr-2 inline size-4" />
                 No video endpoint is set. Add your RunPod video endpoint ID in Settings before rendering.
+                <button type="button" onClick={() => setActiveTab("config")} className="ml-3 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-3 py-1 text-xs font-black text-[#F6D57A]">
+                  Open Config
+                </button>
               </div>
             )}
 
@@ -592,15 +608,15 @@ export const VideoForge = () => {
             </GlassPanel>
           </div>
 
-          <div className="space-y-10">
-            <GlassPanel className="sticky top-24 rounded-[56px] p-9 lg:p-10">
+          <div className="min-w-0 space-y-5">
+            <GlassPanel className="xl:sticky xl:top-24 rounded-[34px] p-6 lg:p-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-100/52">
                     <Eye className="size-4" />
                     Video Preview
                   </div>
-                  <h2 className="mt-3 text-5xl font-black tracking-tight text-white lg:text-6xl">{selectedMotion.label}</h2>
+                  <h2 className="mt-3 text-[clamp(2rem,3.4vw,4rem)] font-black tracking-tight text-white">{selectedMotion.label}</h2>
                 </div>
                 <Button
                   type="button"
@@ -676,7 +692,7 @@ export const VideoForge = () => {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="h-24 rounded-full bg-gradient-to-r from-cyan-200 via-violet-300 to-fuchsia-300 text-xl font-black text-black shadow-[0_0_90px_rgba(168,85,247,0.54)] hover:brightness-110"
+                  className="h-20 rounded-full bg-gradient-to-r from-[#F6D57A] via-[#D4AF37] to-[#8B6F2F] text-lg font-black text-black shadow-[0_0_70px_rgba(212,175,55,0.30)] hover:brightness-110"
                 >
                   {generating ? <Sparkles className="size-5 animate-pulse" /> : <Zap className="size-5" />}
                   Forge Video
@@ -685,6 +701,7 @@ export const VideoForge = () => {
                   type="button"
                   variant="outline"
                   disabled={!lastResultUrl}
+                  title={!lastResultUrl ? "Render a video before downloading." : "Download the latest render."}
                   onClick={() => {
                     if (!lastResultUrl) return;
                     const link = document.createElement("a");

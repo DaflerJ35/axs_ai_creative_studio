@@ -24,9 +24,9 @@ const FRAMEWORKS = [
     name: "P·A·S",
     full: "Problem → Agitate → Solution",
     description: "Surface the pain. Twist the knife. Then save the day. Best hook-to-close ratio for high-ticket products.",
-    color: "from-cyan-400/60 to-slate-600",
-    glow: "shadow-[0_0_20px_rgba(34,211,238,0.08)]",
-    border: "border-cyan-500/20",
+    color: "from-[#F6D57A] via-[#D4AF37] to-[#8B6F2F]",
+    glow: "shadow-[0_0_24px_rgba(212,175,55,0.12)]",
+    border: "border-[#F6D57A]/24",
     totalDuration: "45–60s",
     conversionRating: 5,
     bestFor: ["High-ticket products", "Problem-aware avatars", "Meta Feed", "YouTube Pre-roll"],
@@ -84,9 +84,9 @@ const FRAMEWORKS = [
     name: "Hook·Story·CTA",
     full: "Pattern Interrupt → Personal Story → Hard Close",
     description: "Short punchy hook, a 20-second personal story with stakes, then a confident CTA. Best ratio of length to conversion on short-form.",
-    color: "from-cyan-400/60 to-slate-600",
-    glow: "shadow-[0_0_20px_rgba(34,211,238,0.08)]",
-    border: "border-cyan-500/20",
+    color: "from-[#F6D57A] via-[#D4AF37] to-[#8B6F2F]",
+    glow: "shadow-[0_0_24px_rgba(212,175,55,0.12)]",
+    border: "border-[#F6D57A]/24",
     totalDuration: "25–40s",
     conversionRating: 5,
     bestFor: ["TikTok Shop", "Impulse buys", "Cold traffic short-form", "Under-30 demographics"],
@@ -882,8 +882,8 @@ export const ScriptForge = () => {
         <defs>
           <linearGradient id="scriptForgeArc" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
-            <stop offset="40%" stopColor="#22d3ee" stopOpacity=".7" />
-            <stop offset="70%" stopColor="#a855f7" stopOpacity=".72" />
+            <stop offset="40%" stopColor="#F6D57A" stopOpacity=".68" />
+            <stop offset="70%" stopColor="#D4AF37" stopOpacity=".62" />
             <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
           </linearGradient>
           <filter id="scriptForgeGlow"><feGaussianBlur stdDeviation="5" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -895,14 +895,14 @@ export const ScriptForge = () => {
       <main className="relative grid w-full min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(280px,22%)]">
         <div className="min-w-0 space-y-5">
           <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 p-6 shadow-xl shadow-black/30 backdrop-blur-xl md:p-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(34,211,238,0.05),transparent_30%),radial-gradient(circle_at_85%_10%,rgba(100,116,139,0.06),transparent_34%),radial-gradient(circle_at_50%_85%,rgba(212,160,23,0.04),transparent_35%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(246,213,122,0.08),transparent_30%),radial-gradient(circle_at_85%_10%,rgba(139,111,47,0.08),transparent_34%),radial-gradient(circle_at_50%_85%,rgba(212,175,55,0.05),transparent_35%)]" />
             <div className="relative grid gap-8 xl:grid-cols-[1.1fr_.9fr]">
               <div>
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.28em] text-cyan-200/60">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.28em] text-[#F6D57A]">
                   <Sparkles className="size-3.5" /> Script Forge
                 </div>
                 <h1 className="max-w-3xl text-4xl font-black tracking-tight text-white md:text-6xl">
-                  Scripts that <span className="bg-gradient-to-r from-cyan-200/70 to-slate-200 bg-clip-text text-transparent">stop the scroll.</span>
+                  Writer's room for <span className="bg-gradient-to-r from-[#F6D57A] via-[#D4AF37] to-slate-200 bg-clip-text text-transparent">conversion scripts.</span>
                 </h1>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
                   Turn any product, story, or universe idea into hooks, ad scripts, voiceovers, shot lists, captions, and campaign-ready creative.
@@ -916,7 +916,7 @@ export const ScriptForge = () => {
               <GlassCard className="rounded-2xl border-white/10 bg-slate-950/72 p-5">
                 <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.34em] text-slate-400">Selected Framework</p>
                 <h2 className="text-3xl font-black text-white">{activeFramework.name}</h2>
-                <p className="mt-2 text-sm text-cyan-200/60">{activeFramework.full}</p>
+                <p className="mt-2 text-sm text-[#F6D57A]/70">{activeFramework.full}</p>
                 <p className="mt-4 text-sm leading-6 text-slate-300">{activeFramework.description}</p>
                 <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-4">
                   <div><p className="text-xs text-slate-400">Predicted Fit</p><p className="text-2xl font-black text-white">{currentScript ? "92" : "84"}%</p></div>
@@ -933,7 +933,7 @@ export const ScriptForge = () => {
               <GlassCard key={label} className="rounded-2xl border-white/10 bg-slate-950/72 p-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{label}</p>
                 <p className="mt-2 text-sm text-slate-300">{detail}</p>
-                <div className="mt-4 flex items-end gap-3"><span className="text-3xl font-bold text-white">{value}%</span><div className="mb-2 h-1.5 flex-1 rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300/50 to-cyan-400/30" style={{ width: `${value}%` }} /></div></div>
+                <div className="mt-4 flex items-end gap-3"><span className="text-3xl font-bold text-white">{value}%</span><div className="mb-2 h-1.5 flex-1 rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-[#F6D57A] via-[#D4AF37] to-cyan-300/35" style={{ width: `${value}%` }} /></div></div>
               </GlassCard>
             ))}
           </div>
@@ -941,12 +941,21 @@ export const ScriptForge = () => {
           <GlassCard className="rounded-2xl border-white/10 bg-slate-950/72 p-5">
             <div className="mb-4 flex items-center justify-between gap-4">
               <div><p className="text-[10px] font-bold uppercase tracking-[0.34em] text-slate-400">Script Framework Library</p><h2 className="mt-1 text-lg font-semibold text-white">Pick the engine that matches the job</h2></div>
-              <button className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold text-slate-200">View all frameworks</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOutputTab("script");
+                  toast.info("Framework library expanded", { description: "All visible framework cards are selectable and update the workspace immediately." });
+                }}
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold text-slate-200"
+              >
+                View all frameworks
+              </button>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {FRAMEWORKS.map((f) => (
-                <button key={f.id} onClick={() => setFramework(f.id)} className={`min-h-[152px] rounded-2xl border bg-slate-950/65 p-4 text-left shadow-xl shadow-black/20 transition hover:-translate-y-0.5 ${framework === f.id ? `${f.border} bg-white/[0.07] ${f.glow}` : "border-white/10 hover:border-cyan-300/25"}`}>
-                  <div className="flex items-start justify-between gap-3"><div><h3 className="text-xl font-extrabold text-white">{f.name}</h3><p className="mt-1 text-xs text-slate-400">{f.full}</p></div><span className="grid size-12 place-items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 text-sm font-black text-white">{f.conversionRating * 18}</span></div>
+                <button key={f.id} onClick={() => setFramework(f.id)} className={`min-h-[152px] rounded-2xl border bg-slate-950/65 p-4 text-left shadow-xl shadow-black/20 transition hover:-translate-y-0.5 ${framework === f.id ? `${f.border} bg-white/[0.07] ${f.glow}` : "border-white/10 hover:border-[#F6D57A]/25"}`}>
+                  <div className="flex items-start justify-between gap-3"><div><h3 className="text-xl font-extrabold text-white">{f.name}</h3><p className="mt-1 text-xs text-slate-400">{f.full}</p></div><span className="grid size-12 place-items-center rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 text-sm font-black text-white">{f.conversionRating * 18}</span></div>
                   <p className="mt-4 text-xs leading-5 text-slate-300">{f.bestFor[0]}</p>
                   <div className="mt-3 flex gap-1 text-white/25">{Array.from({ length: f.conversionRating }).map((_, i) => <Star key={i} className="size-3" fill="currentColor" />)}</div>
                 </button>
@@ -1036,13 +1045,31 @@ export const ScriptForge = () => {
                 <div key={k} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{k}</p><p className="text-sm font-bold text-white">{v}%</p></div>
               ))}
             </div>
-            <button className="mt-4 w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 text-xs font-bold text-slate-200">Why this score?</button>
+            <button
+              type="button"
+              onClick={() => toast.info("Score explanation", { description: "AXS scores hook clarity, proof density, CTA strength, audience fit, and platform pacing." })}
+              className="mt-4 w-full rounded-xl border border-white/10 bg-white/[0.04] py-3 text-xs font-bold text-slate-200"
+            >
+              Why this score?
+            </button>
           </GlassCard>
           <GlassCard className="rounded-2xl border-white/10 bg-slate-950/72 p-5">
             <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-slate-400">Quick Tools</p>
             <h3 className="mt-1 mb-4 text-lg font-semibold text-white">Script accelerators</h3>
             {["Hook Generator", "CTA Generator", "Rewrite for Platform", "Shorten Script", "Expand with Scenes"].map((label) => (
-              <button key={label} className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-left text-sm text-slate-200 hover:border-cyan-300/25"><span>{label}</span><ChevronRight className="size-3.5" /></button>
+              <button
+                key={label}
+                type="button"
+                onClick={() => {
+                  if (label.includes("Hook")) setAngle(`${angle}\n\nAdd 5 sharper first-three-second hooks with stronger contrast and proof.`);
+                  if (label.includes("Shorten")) setAngle(`${angle}\n\nCompress the script to the tightest version while preserving proof and CTA.`);
+                  if (label.includes("Proof")) setAngle(`${angle}\n\nAdd concrete proof points, objections, and credibility beats.`);
+                  toast.success(`${label} applied`, { description: "The writing brief was updated for the next generation." });
+                }}
+                className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-left text-sm text-slate-200 hover:border-cyan-300/25"
+              >
+                <span>{label}</span><ChevronRight className="size-3.5" />
+              </button>
             ))}
           </GlassCard>
           <GlassCard className="rounded-2xl border-white/10 bg-slate-950/72 p-5">

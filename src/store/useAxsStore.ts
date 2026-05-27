@@ -149,7 +149,7 @@ function setLocalStorageItem(key: string, value: string): void {
 export const useAxsStore = create<AxsStudioStore>()(
   persist(
     (set) => ({
-      activeTab: "landing",
+      activeTab: "studio",
       setActiveTab: (activeTab) => set({ activeTab }),
       workflowMode: "worldbuilding",
       setWorkflowMode: (workflowMode) => set({ workflowMode }),

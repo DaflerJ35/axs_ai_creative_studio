@@ -5,11 +5,18 @@ import { useMediaQuery } from "../../hooks/useMediaQuery";
 import type { ForgeTab } from "../../lib/types";
 
 const MEMORY_ROUTES = new Set<ForgeTab>([
+  "studio",
   "universe",
   "dna",
+  "scene",
+  "voice",
   "scripts",
+  "images",
+  "videos",
   "strategy",
   "campaign",
+  "distribute",
+  "vault",
   "analytics",
 ]);
 

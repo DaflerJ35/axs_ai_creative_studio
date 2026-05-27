@@ -1,6 +1,6 @@
 {
-  "name": "AXS AI CREATIVE STUDIOS",
-  "description": "Luxurious cyber-noir digital influencer studio for generating consistent fictional virtual characters.",
+  "name": "AXS AI Creative Studio",
+  "description": "The cinematic AI creative operating system for creators, brands, and studios.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

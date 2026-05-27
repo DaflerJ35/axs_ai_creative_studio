@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAxsProofSummary } from "@/lib/useAxsProofSummary";
 import { useAxsStore } from "@/store/useAxsStore";
@@ -62,18 +63,38 @@ export function UniverseForge() {
   const generateSeries = useUniverseForgeStore((state) => state.generateSeries);
   const runContinuityAudit = useUniverseForgeStore((state) => state.runContinuityAudit);
   const setActiveTab = useAxsStore((state) => state.setActiveTab);
+  const setDraftPrompt = useAxsStore((state) => state.setDraftPrompt);
   const proof = useAxsProofSummary();
   const studioMode = useSceneBuilderStore((state) => state.studioMode);
   const setStudioMode = useSceneBuilderStore((state) => state.setStudioMode);
   const nsfwGateAccepted = useSceneBuilderStore((state) => state.nsfwGateAccepted);
   const confirmNsfwGate = useSceneBuilderStore((state) => state.confirmNsfwGate);
   const [nsfwGateOpen, setNsfwGateOpen] = useState(false);
+  const [season, setSeason] = useState("Season 1");
+  const [episodeFilter, setEpisodeFilter] = useState("All");
+  const [bibleFilter, setBibleFilter] = useState("All");
+  const [bibleQuery, setBibleQuery] = useState("");
+  const [detailBeat, setDetailBeat] = useState<StoryBeat | null>(null);
+  const [panelTitle, setPanelTitle] = useState<string | null>(null);
   const isNsfw = studioMode === "nsfw";
   const continuityScore = Math.round(
     continuityChecks.reduce((total, check) => total + (check.status === "ok" ? 100 : check.status === "watch" ? 72 : 38), 0) /
       Math.max(1, continuityChecks.length)
   );
   const activeWorkflows = Math.max(1, Math.round(seriesShots.length / Math.max(1, storyBeats.length)) + 4);
+  const filteredBeats = storyBeats.filter((beat) => {
+    if (episodeFilter === "All") return true;
+    if (episodeFilter === "In Production") return beat.status === "in-progress";
+    if (episodeFilter === "Draft") return beat.status === "not-started";
+    if (episodeFilter === "Outline") return beat.status === "not-started";
+    if (episodeFilter === "Planned") return beat.status !== "generated" && beat.status !== "polished";
+    return true;
+  });
+
+  const runDemoAction = (title: string, description?: string) => {
+    setPanelTitle(title);
+    toast.success(title, { description: description ?? "AXS updated the local Universe Engine demo state." });
+  };
 
   const toggleMode = () => {
     if (isNsfw) {
@@ -120,14 +141,14 @@ export function UniverseForge() {
             <p className="mt-1 text-xs font-semibold text-muted">{bible.title}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button className="axs-ref-select">Season 1</button>
-            <button type="button" onClick={generateStoryArc} className="axs-ref-gold-button"><Plus className="size-3.5" />New Episode</button>
+            <button type="button" onClick={() => { setSeason(season === "Season 1" ? "Season 2" : "Season 1"); toast.success("Season filter updated"); }} className="axs-ref-select">{season}</button>
+            <button type="button" onClick={() => { generateStoryArc(); runDemoAction("New episode arc created", "A fresh story arc was staged in the Universe planner."); }} className="axs-ref-gold-button"><Plus className="size-3.5" />New Episode</button>
           </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {storyBeats.slice(0, 8).map((beat, index) => (
-            <SeasonCard key={beat.id} beat={beat} index={index} onGenerate={() => generateEpisode(beat.id)} />
+            <SeasonCard key={beat.id} beat={beat} index={index} onOpen={() => setDetailBeat(beat)} />
           ))}
         </div>
 
@@ -141,7 +162,7 @@ export function UniverseForge() {
           </div>
           <div className="text-center"><strong>{storyBeats.length}</strong><span>Episodes</span></div>
           <div className="text-center"><strong>{storyBeats.filter((beat) => beat.status === "in-progress").length}</strong><span>In Production</span></div>
-          <button type="button" onClick={generateSeries} className="axs-ref-dark-button">Season Overview</button>
+          <button type="button" onClick={() => { generateSeries(); runDemoAction("Season overview refreshed", "Series continuity and production coverage were recalculated."); }} className="axs-ref-dark-button">Season Overview</button>
         </div>
       </section>
 
@@ -179,9 +200,9 @@ export function UniverseForge() {
                 ))}
               </div>
             </div>
-            <button type="button" onClick={runContinuityAudit} className="axs-ref-gold-button mt-5 w-full justify-center">View Full Report</button>
+            <button type="button" onClick={() => { runContinuityAudit(); runDemoAction("Continuity report opened", "Universe proof, identity, timeline, and lore checks are ready."); }} className="axs-ref-gold-button mt-5 w-full justify-center">View Full Report</button>
           </div>
-          <RecentActivity checks={continuityChecks} />
+          <RecentActivity checks={continuityChecks} onViewAll={() => runDemoAction("Activity drawer opened", "Showing the latest continuity, lore, and timeline activity.")} />
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-4">
           <MiniMetric label="World Rules" value={String(bible.worldRules.length * 35 + 2)} detail="Active Rules" />
@@ -195,13 +216,15 @@ export function UniverseForge() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h2>Episodes</h2>
           <div className="flex flex-wrap items-center gap-2">
-            {["All", "In Production", "Draft", "Outline", "Planned"].map((item, index) => <span key={item} className={cn("axs-ref-filter", index === 0 && "active")}>{item}</span>)}
-            <button className="axs-ref-select ml-2">Sort by: Episode Number</button>
+            {["All", "In Production", "Draft", "Outline", "Planned"].map((item) => (
+              <button type="button" key={item} onClick={() => setEpisodeFilter(item)} className={cn("axs-ref-filter", episodeFilter === item && "active")}>{item}</button>
+            ))}
+            <button type="button" onClick={() => runDemoAction("Episodes sorted", "Episode number sorting is active.")} className="axs-ref-select ml-2">Sort by: Episode Number</button>
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {storyBeats.slice(0, 8).map((beat) => (
-            <EpisodeCard key={beat.id} beat={beat} characters={characters} onGenerate={() => generateEpisode(beat.id)} />
+          {filteredBeats.slice(0, 8).map((beat) => (
+            <EpisodeCard key={beat.id} beat={beat} characters={characters} onOpen={() => setDetailBeat(beat)} onGenerate={() => { generateEpisode(beat.id); toast.success("Episode generation queued"); }} />
           ))}
         </div>
       </section>
@@ -209,7 +232,7 @@ export function UniverseForge() {
       <section className="axs-reference-panel mt-5 p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <h2>Living character graph <span className="text-muted">i</span></h2>
-          <div className="flex gap-2"><button className="axs-ref-select"><Filter className="size-3.5" />Filters</button><button className="axs-ref-select">Expand</button></div>
+          <div className="flex gap-2"><button type="button" onClick={() => runDemoAction("Graph filters opened", "Relationship filters are ready for characters, factions, locations, and conflicts.")} className="axs-ref-select"><Filter className="size-3.5" />Filters</button><button type="button" onClick={() => runDemoAction("Graph expanded", "The living graph is staged for expanded reading mode.")} className="axs-ref-select">Expand</button></div>
         </div>
         <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
           <CharacterGraph characters={characters} relationships={relationships} />
@@ -220,14 +243,21 @@ export function UniverseForge() {
       <section className="axs-reference-panel mt-5 p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <h2>Universe command bible <span className="text-muted">i</span></h2>
-          <div className="flex gap-2"><div className="axs-ref-search"><Search className="size-3.5" />Search the bible...</div><button className="axs-ref-gold-button"><Plus className="size-3.5" />New Entry</button></div>
+          <div className="flex gap-2">
+            <label className="axs-ref-search">
+              <Search className="size-3.5" />
+              <input value={bibleQuery} onChange={(event) => setBibleQuery(event.target.value)} placeholder="Search the bible..." className="min-w-0 bg-transparent text-xs outline-none placeholder:text-white/35" />
+            </label>
+            <button type="button" onClick={() => runDemoAction("New codex entry opened", "A demo entry editor is ready for lore, rules, factions, events, and glossary records.")} className="axs-ref-gold-button"><Plus className="size-3.5" />New Entry</button>
+          </div>
         </div>
-        <div className="mb-4 flex flex-wrap gap-2">{["All", "Lore", "Rules", "Technology", "Factions", "Events", "Glossary"].map((item, index) => <span key={item} className={cn("axs-ref-filter", index === 0 && "active")}>{item}</span>)}</div>
+        <div className="mb-4 flex flex-wrap gap-2">{["All", "Lore", "Rules", "Technology", "Factions", "Events", "Glossary"].map((item) => <button type="button" onClick={() => setBibleFilter(item)} key={item} className={cn("axs-ref-filter", bibleFilter === item && "active")}>{item}</button>)}</div>
+        {bibleQuery || bibleFilter !== "All" ? <p className="mb-3 text-xs text-muted">Filtering bible by {bibleFilter} {bibleQuery ? `and "${bibleQuery}"` : ""}.</p> : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <BibleColumn title="Core Lore" items={["The Veil", "The First Convergence", "The Architects"]} action="View all 28 entries" />
-          <BibleColumn title="World Rules" items={bible.worldRules.slice(0, 3)} action="View all 42 entries" />
-          <BibleColumn title="Technology" items={["Chrono Analyzer", "Signal Mask", "Resonance Core"]} action="View all 18 entries" />
-          <BibleColumn title="Recently Updated" items={["Veil Resonance", "Detective Cole", "Crossover Event"]} action="View All Updates" />
+          <BibleColumn title="Core Lore" items={["The Veil", "The First Convergence", "The Architects"]} action="View all 28 entries" onAction={() => runDemoAction("Core lore opened")} />
+          <BibleColumn title="World Rules" items={bible.worldRules.slice(0, 3)} action="View all 42 entries" onAction={() => runDemoAction("World rules opened")} />
+          <BibleColumn title="Technology" items={["Chrono Analyzer", "Signal Mask", "Resonance Core"]} action="View all 18 entries" onAction={() => runDemoAction("Technology codex opened")} />
+          <BibleColumn title="Recently Updated" items={["Veil Resonance", "Detective Cole", "Crossover Event"]} action="View All Updates" onAction={() => runDemoAction("Recent updates opened")} />
         </div>
       </section>
 
@@ -246,6 +276,21 @@ export function UniverseForge() {
           }}
         />
       )}
+      {detailBeat || panelTitle ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-xl" onClick={() => { setDetailBeat(null); setPanelTitle(null); }}>
+          <div className="w-full max-w-xl rounded-3xl border border-[#F6D57A]/24 bg-[#080808]/96 p-6 shadow-[0_28px_100px_rgba(0,0,0,.75),0_0_70px_rgba(212,175,55,.13)]" onClick={(event) => event.stopPropagation()}>
+            <div className="axs-reference-kicker">{detailBeat ? "Episode Detail" : "Universe Panel"}</div>
+            <h3 className="mt-3 text-2xl font-black text-white">{detailBeat?.title ?? panelTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-muted">
+              {detailBeat ? `${detailBeat.conflict} Continuity score: ${detailBeat.continuityScore}%. Required characters: ${detailBeat.requiredCharacterIds.join(", ") || "TBD"}.` : "This control is now connected to a local demo panel. Backend persistence can be attached later without changing the workflow."}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {detailBeat ? <Button type="button" onClick={() => { setDraftPrompt(detailBeat.scenePrompt); setActiveTab("scene"); }} className="axs-ref-gold-button">Open in Scene Builder</Button> : null}
+              <Button type="button" onClick={() => { setDetailBeat(null); setPanelTitle(null); }} className="axs-ref-dark-button">Close</Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -258,10 +303,10 @@ function HeroStat({ label, value, delta }: { label: string; value: string; delta
   return <div className="axs-hero-stat"><strong>{value}</strong><span>{delta}</span><small>{label}</small></div>;
 }
 
-function SeasonCard({ beat, index, onGenerate }: { beat: StoryBeat; index: number; onGenerate: () => void }) {
+function SeasonCard({ beat, index, onOpen }: { beat: StoryBeat; index: number; onOpen: () => void }) {
   const meta = STATUS_META[beat.status];
   return (
-    <button type="button" onClick={onGenerate} className="axs-season-tile text-left">
+    <button type="button" onClick={onOpen} className="axs-season-tile text-left">
       <div className="flex items-start justify-between gap-3"><span className="text-2xl font-semibold text-white">{String(index + 1).padStart(2, "0")}</span><span className={meta.className}>{meta.label}</span></div>
       <h3 className="mt-5 truncate text-sm font-black uppercase text-white">{beat.title}</h3>
       <p className="mt-2 text-xs font-semibold text-muted">Written by AXS</p>
@@ -276,15 +321,15 @@ function HealthLine({ label, value }: { label: string; value: number }) {
   return <div className="grid grid-cols-[1fr_120px_42px] items-center gap-3 text-xs"><span className="text-muted">{label}</span><span className="h-1.5 rounded-full bg-white/10"><span className="block h-full rounded-full bg-[linear-gradient(90deg,var(--axs-teal),var(--axs-green))]" style={{ width: `${Math.max(8, Math.min(100, value))}%` }} /></span><span className="font-mono text-[color:var(--axs-teal)]">{value}%</span></div>;
 }
 
-function RecentActivity({ checks }: { checks: ContinuityCheck[] }) {
-  return <div className="axs-command-health-card"><div className="axs-reference-kicker">Recent Activity</div><div className="mt-4 space-y-3">{checks.map((check, index) => <div key={check.id} className="flex gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3"><span className="flex size-7 items-center justify-center rounded-full border border-cyan-200/16 bg-cyan-300/[0.08] text-cyan-100"><Clock3 className="size-3.5" /></span><div><div className="text-sm font-semibold text-white">{check.label}</div><p className="mt-1 line-clamp-1 text-xs text-muted">{check.detail} - {index + 1}h ago</p></div></div>)}</div><button className="axs-ref-gold-button mt-4 w-full justify-center">View All Activity</button></div>;
+function RecentActivity({ checks, onViewAll }: { checks: ContinuityCheck[]; onViewAll: () => void }) {
+  return <div className="axs-command-health-card"><div className="axs-reference-kicker">Recent Activity</div><div className="mt-4 space-y-3">{checks.map((check, index) => <div key={check.id} className="flex gap-3 rounded-lg border border-white/8 bg-white/[0.025] p-3"><span className="flex size-7 items-center justify-center rounded-full border border-cyan-200/16 bg-cyan-300/[0.08] text-cyan-100"><Clock3 className="size-3.5" /></span><div><div className="text-sm font-semibold text-white">{check.label}</div><p className="mt-1 line-clamp-1 text-xs text-muted">{check.detail} - {index + 1}h ago</p></div></div>)}</div><button type="button" onClick={onViewAll} className="axs-ref-gold-button mt-4 w-full justify-center">View All Activity</button></div>;
 }
 
 function MiniMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return <div className="axs-mini-metric"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>;
 }
 
-function EpisodeCard({ beat, characters, onGenerate }: { beat: StoryBeat; characters: UniverseCharacterMemory[]; onGenerate: () => void }) {
+function EpisodeCard({ beat, characters, onOpen, onGenerate }: { beat: StoryBeat; characters: UniverseCharacterMemory[]; onOpen: () => void; onGenerate: () => void }) {
   const meta = STATUS_META[beat.status];
   const required = beat.requiredCharacterIds.map((id) => characters.find((character) => character.id === id)?.name).filter(Boolean).join(", ");
   return (
@@ -307,9 +352,14 @@ function EpisodeCard({ beat, characters, onGenerate }: { beat: StoryBeat; charac
       <div className="mt-2 h-1.5 rounded-full bg-white/10">
         <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--axs-teal),var(--axs-green))]" style={{ width: `${beat.continuityScore}%` }} />
       </div>
-      <Button type="button" onClick={onGenerate} className="axs-ref-dark-button mt-4 w-full justify-center h-9 text-xs">
+      <div className="mt-4 grid grid-cols-2 gap-2">
+      <Button type="button" onClick={onOpen} className="axs-ref-dark-button h-9 justify-center text-xs">
         View Details
       </Button>
+      <Button type="button" onClick={onGenerate} className="axs-ref-gold-button h-9 justify-center text-xs">
+        Generate
+      </Button>
+      </div>
     </div>
   );
 }
@@ -320,11 +370,11 @@ function CharacterGraph({ characters, relationships }: { characters: UniverseCha
 }
 
 function GraphInsights({ relationships }: { relationships: UniverseRelationship[] }) {
-  return <aside className="axs-graph-insights"><div className="axs-reference-kicker">Graph Insights</div>{[["3 key conflicts", "Driving the narrative", AlertTriangle], ["2 alliance shifts", "Detected this season", Network], ["1 new connection", "Revealed in Episode 5", CheckCircle2], ["Network density", `${relationships.length} active links`, Sparkles]].map(([label, detail, Icon]) => <div key={String(label)} className="axs-insight-row"><Icon className="size-4" /><div><strong>{String(label)}</strong><span>{String(detail)}</span></div></div>)}<button className="axs-ref-gold-button mt-4 w-full justify-center">Analyze More</button></aside>;
+  return <aside className="axs-graph-insights"><div className="axs-reference-kicker">Graph Insights</div>{[["3 key conflicts", "Driving the narrative", AlertTriangle], ["2 alliance shifts", "Detected this season", Network], ["1 new connection", "Revealed in Episode 5", CheckCircle2], ["Network density", `${relationships.length} active links`, Sparkles]].map(([label, detail, Icon]) => <div key={String(label)} className="axs-insight-row"><Icon className="size-4" /><div><strong>{String(label)}</strong><span>{String(detail)}</span></div></div>)}<button type="button" onClick={() => toast.success("Relationship analysis updated", { description: `${relationships.length} links scanned for conflicts, alliances, and continuity drift.` })} className="axs-ref-gold-button mt-4 w-full justify-center">Analyze More</button></aside>;
 }
 
-function BibleColumn({ title, items, action }: { title: string; items: string[]; action: string }) {
-  return <div className="axs-bible-column"><div className="axs-reference-kicker">{title}</div><div className="mt-4 space-y-3">{items.map((item) => <div key={item}><strong>{item}</strong><p>{biblePreview(item)}</p></div>)}</div><button className="axs-ref-gold-button mt-4 w-full justify-center">{action}</button></div>;
+function BibleColumn({ title, items, action, onAction }: { title: string; items: string[]; action: string; onAction: () => void }) {
+  return <div className="axs-bible-column"><div className="axs-reference-kicker">{title}</div><div className="mt-4 space-y-3">{items.map((item) => <button type="button" onClick={() => toast.success(`${item} opened`, { description: "Codex detail drawer is running in local demo mode." })} className="block w-full text-left" key={item}><strong>{item}</strong><p>{biblePreview(item)}</p></button>)}</div><button type="button" onClick={onAction} className="axs-ref-gold-button mt-4 w-full justify-center">{action}</button></div>;
 }
 
 function initials(name: string) {

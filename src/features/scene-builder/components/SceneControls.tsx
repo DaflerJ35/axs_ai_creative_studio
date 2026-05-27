@@ -118,6 +118,8 @@ export function SceneControls() {
   const updateCamera = useSceneBuilderStore((state) => state.updateCamera);
   const updateLighting = useSceneBuilderStore((state) => state.updateLighting);
   const updateAdvanced = useSceneBuilderStore((state) => state.updateAdvanced);
+  const runGeneration = useSceneBuilderStore((state) => state.runGeneration);
+  const isGenerating = useSceneBuilderStore((state) => state.isGenerating);
   const selectedItem = canvasItems.find((item) => item.instanceId === selectedItemId);
   const prompt = buildPrompt(canvasItems, camera, lighting, advanced.nsfwEnabled);
   const workflowDetail = proof.categories.workflow.signals[0]?.detail;
@@ -230,11 +232,11 @@ export function SceneControls() {
 
       <div className="shrink-0 border-t border-white/[0.06] p-5">
         <div className="grid grid-cols-2 gap-3">
-          <Button className="h-11 rounded-full bg-white text-sm font-black text-black hover:bg-cyan-100">
+          <Button onClick={() => runGeneration("image")} disabled={isGenerating} className="h-11 rounded-full bg-[#D4AF37] text-sm font-black text-black hover:bg-[#F6D57A]">
             <Sparkles className="size-4" />
             Image
           </Button>
-          <Button className="h-11 rounded-full border border-white/12 bg-white/[0.04] text-sm font-black text-white hover:bg-white/[0.08]">
+          <Button onClick={() => runGeneration("video")} disabled={isGenerating} className="h-11 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 text-sm font-black text-[#F6D57A] hover:bg-[#D4AF37]/16">
             <Clapperboard className="size-4" />
             Video
           </Button>

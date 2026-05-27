@@ -48,10 +48,10 @@ interface ReferenceImage {
 }
 
 const STYLE_PRESETS: Array<{ id: StylePreset; label: string; detail: string; className: string }> = [
-  { id: "cinematic", label: "Cinematic", detail: "ARRI color, film still", className: "from-cyan-200 to-violet-300" },
-  { id: "portrait", label: "Hyper-Real", detail: "Skin detail, lens depth", className: "from-emerald-200 to-cyan-300" },
-  { id: "editorial", label: "Editorial", detail: "Fashion campaign polish", className: "from-fuchsia-200 to-rose-300" },
-  { id: "anime", label: "Anime", detail: "Stylized clean frames", className: "from-pink-200 to-violet-300" },
+  { id: "cinematic", label: "Cinematic", detail: "ARRI color, film still", className: "from-[#F6D57A] via-[#D4AF37] to-[#8B6F2F]" },
+  { id: "portrait", label: "Hyper-Real", detail: "Skin detail, lens depth", className: "from-[#F6D57A] via-teal-200/80 to-[#8B6F2F]" },
+  { id: "editorial", label: "Editorial", detail: "Fashion campaign polish", className: "from-[#F6D57A] via-rose-200/70 to-[#8B6F2F]" },
+  { id: "anime", label: "Anime", detail: "Stylized clean frames", className: "from-[#F6D57A] via-fuchsia-200/60 to-[#8B6F2F]" },
   { id: "concept_art", label: "Concept", detail: "Production design mood", className: "from-amber-200 to-orange-300" },
   { id: "raw", label: "Raw", detail: "No style booster", className: "from-zinc-200 to-slate-300" },
 ];
@@ -79,6 +79,11 @@ function imageOutputToUrl(image: string, mime = "image/png") {
   return `data:${mime};base64,${image}`;
 }
 
+function demoImageDataUrl(width: number, height: number) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#050505"/><stop offset=".55" stop-color="#171717"/><stop offset="1" stop-color="#8B6F2F"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="${Math.round(width * 0.72)}" cy="${Math.round(height * 0.22)}" r="${Math.round(Math.min(width, height) * 0.16)}" fill="#D4AF37" opacity=".18"/><rect x="8%" y="12%" width="84%" height="76%" rx="32" fill="none" stroke="#F6D57A" stroke-opacity=".34" stroke-width="3"/><text x="10%" y="82%" fill="#F6D57A" font-family="Arial" font-size="34" font-weight="700">AXS DEMO FRAME</text></svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+}
+
 const QUICK_TAGS = [
   "cinematic close-up",
   "luxury editorial",
@@ -101,12 +106,12 @@ function GlassPanel({ children, className }: { children: ReactNode; className?: 
   return (
     <section
       className={cn(
-        "axs-panel axs-panel-corners relative overflow-hidden rounded-2xl border-[var(--axs-border)] bg-[#041018]/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.13),0_26px_90px_rgba(0,0,0,0.48),0_0_42px_rgba(0,212,255,0.06)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-x-10 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[rgba(255,200,87,0.72)] before:to-transparent",
+        "axs-panel axs-panel-corners relative overflow-hidden rounded-2xl border-[var(--axs-gold-border)] bg-[#080808]/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_26px_90px_rgba(0,0,0,0.48),0_0_42px_rgba(212,175,55,0.08)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-x-10 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[rgba(246,213,122,0.72)] before:to-transparent",
         className
       )}
     >
-      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-cyan-300/[0.045] blur-3xl" />
-      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-violet-400/[0.055] blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 top-8 size-[30rem] rounded-full bg-[#D4AF37]/[0.05] blur-3xl" />
+      <div className="pointer-events-none absolute -left-36 bottom-4 size-[32rem] rounded-full bg-[#8B6F2F]/[0.055] blur-3xl" />
       <div className="relative">{children}</div>
     </section>
   );
@@ -288,10 +293,26 @@ export const ImageForge = () => {
       setProgressNote("Images forged");
       toast.success(`${nextResults.length} image${nextResults.length === 1 ? "" : "s"} ready`);
     } catch (error) {
-      toast.error("Image Forge failed", {
-        description: error instanceof Error ? error.message : "Unknown generation error",
+      const demoResult: ForgeResult = {
+        id: crypto.randomUUID(),
+        type: "image",
+        url: demoImageDataUrl(settings.width, settings.height),
+        prompt: composedPrompt || "AXS demo image generated while render endpoint is not configured.",
+        seed: Math.floor(Math.random() * 1_000_000_000),
+        characterId: character?.id,
+        stylePreset: settings.stylePreset,
+        width: settings.width,
+        height: settings.height,
+        createdAt: Date.now(),
+        favorite: false,
+      };
+      addToGallery(demoResult);
+      setSessionResults((current) => [demoResult, ...current].slice(0, 16));
+      setProgress(100);
+      setProgressNote("Demo image staged");
+      toast.info("Demo image staged", {
+        description: error instanceof Error ? `Render endpoint needs setup: ${error.message}` : "Render endpoint needs setup.",
       });
-      setProgressNote("Generation failed");
     } finally {
       window.setTimeout(() => {
         setGenerating(false);
@@ -330,8 +351,8 @@ export const ImageForge = () => {
         <defs>
           <linearGradient id="imageForgeEnergyLine" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#22d3ee" stopOpacity="0" />
-            <stop offset="35%" stopColor="#22d3ee" stopOpacity=".75" />
-            <stop offset="70%" stopColor="#a855f7" stopOpacity=".65" />
+            <stop offset="35%" stopColor="#F6D57A" stopOpacity=".72" />
+            <stop offset="70%" stopColor="#D4AF37" stopOpacity=".58" />
             <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
           </linearGradient>
           <filter id="imageForgeGlowLine"><feGaussianBlur stdDeviation="5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -350,7 +371,19 @@ export const ImageForge = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {["Quick Start", "Inspiration", "Batch Creator", "Canvas Studio"].map((item) => (
-                <button key={item} className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-200">{item}</button>
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    if (item === "Quick Start") setDraftPrompt("Premium cinematic portrait, black and gold studio lighting, consistent Character DNA, production still.");
+                    if (item === "Batch Creator") setGenerationMode("variation");
+                    if (item === "Canvas Studio") setActiveTab("scene");
+                    toast.success(`${item} selected`, { description: "Image Forge updated the local workspace." });
+                  }}
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-200"
+                >
+                  {item}
+                </button>
               ))}
             </div>
           </div>
@@ -361,17 +394,17 @@ export const ImageForge = () => {
           <CommandMetric label="Workflow" value={settings.comfyuiModel ? "Auto-fit" : "Default"} delta={settings.comfyuiModel || "ComfyUI"} Icon={WandSparkles} accent="gold" />
           <CommandMetric label="Proof score" value={`${proof.overallScore}%`} delta={proof.status} Icon={Lock} accent="cyan" />
         </section>
-        <main className="mx-auto grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1.8fr)]">
-          <div className="min-w-0 space-y-8">
-            <GlassPanel className="p-8 lg:p-10">
+        <main className="mx-auto grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)] 2xl:grid-cols-[minmax(0,0.92fr)_minmax(32rem,1.08fr)]">
+          <div className="min-w-0 space-y-5">
+            <GlassPanel className="p-6 lg:p-8">
               <div className="flex flex-wrap items-start justify-between gap-5">
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200/14 bg-cyan-300/[0.07] px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-cyan-100/64">
                     <Dna className="size-4" />
                     Reference / FaceLock
                   </div>
-                  <h1 className="mt-6 max-w-xl text-6xl font-black tracking-tight text-white lg:text-7xl">
-                    Forge the frame.
+                  <h1 className="mt-6 max-w-xl text-[clamp(2.5rem,4.3vw,4.8rem)] font-black leading-[.94] tracking-tight text-white">
+                    Visual production lab.
                   </h1>
                   <p className="mt-6 max-w-2xl text-base leading-8 text-white/54">
                     Upload face, body, style, and outfit references, then lock Character DNA from Character Studio or Universe Forge before generating.
@@ -604,15 +637,15 @@ export const ImageForge = () => {
             </GlassPanel>
           </div>
 
-          <div className="space-y-10">
-            <GlassPanel className="sticky top-24 rounded-[56px] p-8 lg:p-10">
+          <div className="min-w-0 space-y-5">
+            <GlassPanel className="xl:sticky xl:top-24 rounded-[34px] p-6 lg:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-100/52">
                     <ImageIcon className="size-4" />
                     Live Preview
                   </div>
-                  <h2 className="mt-3 max-w-2xl text-5xl font-black tracking-tight text-white lg:text-6xl">
+                  <h2 className="mt-3 max-w-2xl text-[clamp(2rem,3.4vw,4rem)] font-black tracking-tight text-white">
                     {previewResult ? "Latest Forge" : "Ready for Image DNA"}
                   </h2>
                 </div>
@@ -628,7 +661,7 @@ export const ImageForge = () => {
 
               <div className="mt-9 grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-black/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_72px_rgba(0,0,0,0.40)]">
-                  <div className="aspect-[4/5] max-h-[min(70vh,760px)] min-h-[400px]">
+                  <div className="aspect-[4/5] max-h-[min(64vh,680px)] min-h-[360px]">
                     <AnimatePresence mode="wait">
                       {previewResult ? (
                         <motion.img
@@ -699,7 +732,7 @@ export const ImageForge = () => {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="h-24 rounded-full bg-gradient-to-r from-cyan-200 via-violet-300 to-fuchsia-300 text-xl font-black text-black shadow-[0_0_90px_rgba(168,85,247,0.54)] hover:brightness-110"
+                  className="h-20 rounded-full bg-gradient-to-r from-[#F6D57A] via-[#D4AF37] to-[#8B6F2F] text-lg font-black text-black shadow-[0_0_70px_rgba(212,175,55,0.30)] hover:brightness-110"
                 >
                   {generating ? <Sparkles className="size-5 animate-pulse" /> : <Zap className="size-5" />}
                   Forge Images Now
@@ -711,6 +744,7 @@ export const ImageForge = () => {
                     handleGenerate();
                   }}
                   disabled={generating || !previewResult}
+                  title={!previewResult ? "Generate or select an image before re-forging." : "Create a variation from the latest image."}
                   variant="outline"
                   className="h-24 rounded-full border-white/12 bg-white/[0.065] px-6 text-sm font-black text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white hover:text-black"
                 >
