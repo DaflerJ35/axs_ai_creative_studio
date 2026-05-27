@@ -1,0 +1,30 @@
+{
+  "id": "axs-fast-single-i2v-ltx23",
+  "version": 1,
+  "model": "ltx-video-2.3",
+  "workflow": "ltx-2.3-character-consistent-directors-cut",
+  "purpose": "Fast single image-to-video generation for Scene Builder and Motion Studio.",
+  "recommended_gpu": "RTX 3080 10GB",
+  "generation": {
+    "resolution": "1216x832",
+    "fps": 16,
+    "steps": 22,
+    "cfg": 3.8,
+    "denoise": 0.86,
+    "duration_seconds": 5,
+    "batch_size": 1
+  },
+  "consistency": {
+    "ip_adapter_strength": 0.8,
+    "facelock_strength": 0.84,
+    "body_reference_lock": 0.68,
+    "controlnet_pose_strength": 0.52,
+    "continuity_passes": ["dna", "pose", "lighting"]
+  },
+  "post": {
+    "upscale": "RTX VSR 3840x2160 ULTRA",
+    "interpolation": "off",
+    "format": "h264-mp4",
+    "crf": 20
+  }
+}

@@ -1,0 +1,136 @@
+.axs-circuit-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(34, 211, 238, 0.08), transparent 32%),
+    radial-gradient(circle at 82% 18%, rgba(168, 85, 247, 0.1), transparent 36%),
+    radial-gradient(circle at 55% 88%, rgba(34, 211, 238, 0.06), transparent 34%),
+    linear-gradient(180deg, #02040a 0%, #050711 48%, #02040a 100%);
+}
+
+.axs-circuit-base {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.12), transparent 3px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
+  background-size:
+    180px 180px,
+    120px 120px,
+    120px 120px;
+  mask-image: radial-gradient(circle at center, black 0%, black 55%, transparent 95%);
+}
+
+.axs-circuit-depth {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.32;
+  background:
+    radial-gradient(ellipse at 25% 55%, rgba(34, 211, 238, 0.16), transparent 28%),
+    radial-gradient(ellipse at 70% 45%, rgba(168, 85, 247, 0.14), transparent 30%),
+    radial-gradient(ellipse at 50% 90%, rgba(221, 184, 101, 0.08), transparent 24%);
+  filter: blur(18px);
+}
+
+.axs-circuit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.axs-circuit-substrate path {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.13);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.axs-circuit-branches path {
+  fill: none;
+  stroke: rgba(34, 211, 238, 0.2);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.axs-electric-rivers path {
+  fill: none;
+  stroke: url("#axsCircuitCyanViolet");
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url("#axsCircuitGlow");
+  stroke-dasharray: 18 28;
+  animation: axsCircuitFlow 14s linear infinite;
+}
+
+.axs-electric-rivers path:nth-child(2) {
+  animation-duration: 18s;
+  animation-direction: reverse;
+  opacity: 0.85;
+}
+
+.axs-electric-rivers path:nth-child(3) {
+  animation-duration: 22s;
+  opacity: 0.65;
+}
+
+.axs-circuit-nodes circle {
+  fill: rgba(34, 211, 238, 0.95);
+  filter: url("#axsNodeGlow");
+  animation: axsNodePulse 3.8s ease-in-out infinite;
+}
+
+.axs-circuit-nodes circle:nth-child(2n) {
+  fill: rgba(168, 85, 247, 0.95);
+  animation-delay: 0.8s;
+}
+
+.axs-circuit-nodes circle:nth-child(3n) {
+  fill: rgba(221, 184, 101, 0.85);
+  animation-delay: 1.5s;
+}
+
+.axs-circuit-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 0%, transparent 48%, rgba(0, 0, 0, 0.65) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.6), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.7));
+}
+
+@keyframes axsCircuitFlow {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -920;
+  }
+}
+
+@keyframes axsNodePulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    r: 2.6;
+  }
+  50% {
+    opacity: 1;
+    r: 4.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axs-electric-rivers path,
+  .axs-circuit-nodes circle {
+    animation: none;
+  }
+}

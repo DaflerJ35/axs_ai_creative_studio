@@ -1,0 +1,618 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import './index.css';
+
+/* AXS GLOBAL STYLES
+   This file is the single style entrypoint. It layers the AXS design tokens
+   and shared primitives over the existing application stylesheet. */
+
+:root {
+  --axs-void: #050505;
+  --axs-base: #0A0A0A;
+  --axs-surface: #1A1A1A;
+  --axs-elevated: #222222;
+  --axs-border: #333333;
+  --axs-border-bright: #444444;
+
+  --axs-teal: #00E5FF;
+  --axs-purple: #B026FF;
+  --axs-amber: #E5B344;
+  --axs-gold: #D4AF37;
+  --axs-green: #22c55e;
+  --axs-red: #ef4444;
+
+  --axs-text-primary: #F5F5F5;
+  --axs-text-secondary: #A0A0A0;
+  --axs-text-muted: #888888;
+  --axs-text-dim: rgba(136, 136, 136, 0.55);
+
+  --axs-sidebar-width: 104px;
+  --axs-memory-rail-width: 260px;
+  --axs-topbar-height: 64px;
+
+  --axs-t-fast: 150ms;
+  --axs-t-normal: 300ms;
+  --axs-t-slow: 500ms;
+  --axs-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --axs-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --axs-snap: cubic-bezier(0.4, 0, 0, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--axs-base);
+  color: var(--axs-text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+#root {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--axs-base);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--axs-text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+h1 {
+  font-size: 1.875rem;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+h5 {
+  font-size: 0.875rem;
+}
+
+h6 {
+  font-size: 0.8125rem;
+}
+
+p {
+  color: var(--axs-text-secondary);
+  line-height: 1.6;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+}
+
+a {
+  color: var(--axs-teal);
+  text-decoration: none;
+  transition: color var(--axs-t-fast) var(--axs-ease);
+}
+
+a:hover {
+  color: #4de8ff;
+}
+
+::selection {
+  background-color: rgba(124, 58, 237, 0.35);
+  color: #ffffff;
+}
+
+* {
+  scrollbar-color: rgba(124, 58, 237, 0.25) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgba(124, 58, 237, 0.25);
+  transition: background-color var(--axs-t-fast);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(124, 58, 237, 0.45);
+}
+
+:focus-visible,
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.4);
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input[type='range'] {
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  outline: none;
+  background: var(--axs-border);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--axs-teal);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+  cursor: pointer;
+  transition: box-shadow var(--axs-t-fast);
+  -webkit-appearance: none;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--axs-teal);
+  cursor: pointer;
+}
+
+/* Layout shell is managed by App.tsx + index.css to avoid conflicting systems. */
+/* Use .axs-main-shell, .axs-page-inner, .axs-page-grid from index.css instead. */
+
+.axs-glow-ring {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.axs-glow-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--axs-teal) 0%,
+    var(--axs-purple) var(--ring-pct, 92%),
+    var(--axs-border) var(--ring-pct, 92%)
+  );
+  animation: ring-pulse 3s ease-in-out infinite;
+  -webkit-mask: radial-gradient(circle, transparent 60%, black 61%);
+  mask: radial-gradient(circle, transparent 60%, black 61%);
+}
+
+.axs-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.axs-dot-live {
+  background-color: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+.axs-dot-watch {
+  background-color: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+}
+
+.axs-dot-blocked {
+  background-color: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.axs-dot-draft {
+  background-color: #6b7280;
+}
+
+.axs-dot-pulse {
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.axs-live-ring {
+  position: relative;
+}
+
+.axs-live-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid #22c55e;
+  border-radius: 50%;
+  animation: live-ring 2s ease-out infinite;
+}
+
+.axs-lightning-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.axs-card-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.axs-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms var(--axs-ease);
+}
+
+.axs-card-image:hover img {
+  transform: scale(1.04);
+}
+
+.axs-card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(10, 10, 15, 0.8) 100%);
+  pointer-events: none;
+}
+
+.axs-progress {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: var(--axs-border);
+}
+
+.axs-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--axs-purple), var(--axs-teal));
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  transition: width 600ms var(--axs-ease);
+}
+
+.axs-progress-fill-amber {
+  background: linear-gradient(90deg, #d97706, var(--axs-amber));
+}
+
+.axs-progress-fill-green {
+  background: linear-gradient(90deg, #16a34a, var(--axs-green));
+}
+
+.axs-workflow-node {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--axs-border);
+  border-radius: 10px;
+  background-color: var(--axs-surface);
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: border-color var(--axs-t-fast), box-shadow var(--axs-t-fast);
+}
+
+.axs-workflow-node::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.axs-workflow-node:hover {
+  border-color: rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.08);
+}
+
+.axs-workflow-node.active {
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.12), inset 0 0 20px rgba(0, 212, 255, 0.04);
+}
+
+.axs-workflow-node.complete {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.axs-workflow-node .node-number {
+  color: var(--axs-text-dim);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.axs-workflow-node .node-label {
+  margin-top: 0.25rem;
+  color: var(--axs-text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.axs-workflow-node .node-sublabel {
+  margin-top: 0.125rem;
+  color: var(--axs-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.axs-workflow-node .node-check {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 50%;
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  font-size: 8px;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.04) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.axs-chart-tooltip {
+  border: 1px solid var(--axs-border-bright) !important;
+  border-radius: 8px !important;
+  background-color: var(--axs-elevated) !important;
+  color: var(--axs-text-primary) !important;
+  padding: 0.5rem 0.75rem !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  font-size: 0.75rem !important;
+}
+
+.recharts-legend-item-text {
+  color: var(--axs-text-muted) !important;
+  font-size: 0.75rem !important;
+}
+
+.axs-motion-ready {
+  will-change: transform, opacity;
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes live-ring {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+@keyframes arc-flicker {
+  0%,
+  95%,
+  100% {
+    opacity: 1;
+  }
+
+  96% {
+    opacity: 0.4;
+  }
+
+  97% {
+    opacity: 0.9;
+  }
+
+  98% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.2), 0 0 20px rgba(0, 212, 255, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.15);
+  }
+}
+
+/* Tab-specific studio textures: keeps one shell, but each workspace feels like its own professional room. */
+.axs-studio-texture {
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  background-repeat: repeat;
+  transition: opacity 240ms ease, background 240ms ease;
+}
+
+.axs-studio-texture-command {
+  background-image:
+    linear-gradient(90deg, transparent 0 24px, rgba(34, 211, 238, 0.12) 25px, transparent 26px),
+    linear-gradient(0deg, transparent 0 54px, rgba(167, 139, 250, 0.10) 55px, transparent 56px);
+  background-size: 112px 112px;
+}
+
+.axs-studio-texture-orbit {
+  background-image:
+    radial-gradient(circle at 50% 50%, transparent 0 34px, rgba(56, 189, 248, 0.18) 35px, transparent 36px),
+    radial-gradient(circle at 50% 50%, transparent 0 72px, rgba(167, 139, 250, 0.12) 73px, transparent 74px);
+  background-size: 220px 220px;
+}
+
+.axs-studio-texture-helix {
+  background-image:
+    radial-gradient(circle, rgba(167, 139, 250, 0.20) 0 1px, transparent 2px),
+    linear-gradient(115deg, transparent 0 46%, rgba(167, 139, 250, 0.12) 47%, transparent 49% 100%);
+  background-size: 32px 32px, 180px 180px;
+}
+
+.axs-studio-texture-wave {
+  background-image: repeating-radial-gradient(ellipse at center, rgba(45, 212, 191, 0.16) 0 1px, transparent 2px 18px);
+  background-size: 260px 90px;
+}
+
+.axs-studio-texture-script {
+  background-image: linear-gradient(rgba(244, 114, 182, 0.10) 1px, transparent 1px);
+  background-size: 100% 28px;
+}
+
+.axs-studio-texture-lens {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.16) 0 1px, transparent 2px 52px),
+    linear-gradient(135deg, transparent 0 48%, rgba(96, 165, 250, 0.12) 49%, transparent 50%);
+  background-size: 180px 180px;
+}
+
+.axs-studio-texture-film {
+  background-image:
+    linear-gradient(90deg, rgba(251, 113, 133, 0.16) 0 2px, transparent 2px 36px),
+    linear-gradient(rgba(251, 113, 133, 0.10) 0 1px, transparent 1px 34px);
+  background-size: 88px 70px;
+}
+
+.axs-studio-texture-campaign {
+  background-image:
+    linear-gradient(120deg, transparent 0 46%, rgba(245, 158, 11, 0.13) 47%, transparent 48%),
+    radial-gradient(circle, rgba(245, 158, 11, 0.12) 0 1px, transparent 2px);
+  background-size: 180px 180px, 34px 34px;
+}
+
+.axs-studio-texture-distribution {
+  background-image:
+    linear-gradient(90deg, transparent 0 48%, rgba(52, 211, 153, 0.12) 49%, transparent 50%),
+    linear-gradient(0deg, transparent 0 48%, rgba(52, 211, 153, 0.10) 49%, transparent 50%);
+  background-size: 120px 120px;
+}
+
+.axs-studio-texture-archive {
+  background-image:
+    linear-gradient(rgba(214, 179, 101, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 179, 101, 0.08) 1px, transparent 1px);
+  background-size: 64px 42px;
+}
+
+.axs-studio-texture-analytics {
+  background-image:
+    linear-gradient(135deg, rgba(192, 132, 252, 0.12) 0 1px, transparent 1px 22px),
+    radial-gradient(circle, rgba(34, 211, 238, 0.12) 0 1px, transparent 2px);
+  background-size: 44px 44px, 72px 72px;
+}
+
+.axs-studio-texture-config {
+  background-image:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.10) 1px, transparent 1px),
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 54px 54px;
+}

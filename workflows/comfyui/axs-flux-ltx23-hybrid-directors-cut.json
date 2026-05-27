@@ -1,0 +1,39 @@
+{
+  "id": "axs-flux-ltx23-hybrid-directors-cut",
+  "version": 1,
+  "model": "flux + ltx-video-2.3",
+  "workflow": "flux-image-lock-to-ltx-2.3-directors-cut",
+  "purpose": "Generate a premium FLUX keyframe, lock identity and body references, then animate through LTX 2.3.",
+  "recommended_gpu": "RTX 3080 10GB",
+  "keyframe": {
+    "model": "flux",
+    "resolution": "1024x1536",
+    "steps": 24,
+    "guidance": 3.5,
+    "face_reference": "PuLID/IP-Adapter when available",
+    "negative": "flicker, warped identity, broken anatomy, inconsistent wardrobe"
+  },
+  "video": {
+    "model": "ltx-video-2.3",
+    "resolution": "832x1216",
+    "fps": 24,
+    "steps": 30,
+    "cfg": 4.4,
+    "denoise": 0.9,
+    "ip_adapter_strength": 0.9,
+    "facelock_strength": 0.92,
+    "body_reference_lock": 0.82,
+    "controlnet_pose_strength": 0.66
+  },
+  "director_cut": {
+    "continuity_passes": ["dna", "wardrobe", "pose", "lighting", "timeline"],
+    "transition_policy": "match emotional beat first, camera direction second, wardrobe continuity always",
+    "stitching": "smooth cinematic transitions with color match"
+  },
+  "post": {
+    "upscale": "RTX VSR 3840x2160 ULTRA",
+    "interpolation": "RIFE 2x",
+    "format": "h264-mp4",
+    "crf": 19
+  }
+}

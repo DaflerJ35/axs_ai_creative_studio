@@ -1,0 +1,61 @@
+.axs-circuit-lightning {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint;
+  background:
+    radial-gradient(circle at 50% 92%, rgba(168, 85, 247, 0.13), transparent 16%),
+    radial-gradient(circle at 50% 91%, rgba(34, 211, 238, 0.10), transparent 22%),
+    radial-gradient(circle at 50% 46%, rgba(34, 211, 238, 0.06), transparent 24%),
+    radial-gradient(circle at 68% 35%, rgba(168, 85, 247, 0.08), transparent 30%),
+    radial-gradient(circle at 28% 75%, rgba(34, 211, 238, 0.06), transparent 34%),
+    linear-gradient(180deg, #02040a 0%, #040714 48%, #02040a 100%);
+}
+
+.axs-circuit-lightning-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.axs-circuit-lightning-depth {
+  position: absolute;
+  inset: -18%;
+  opacity: 0.38;
+  filter: blur(24px);
+  background:
+    radial-gradient(ellipse at 50% 92%, rgba(168, 85, 247, 0.22), transparent 23%),
+    radial-gradient(ellipse at 50% 88%, rgba(34, 211, 238, 0.18), transparent 28%),
+    radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.12), transparent 26%),
+    radial-gradient(ellipse at 60% 42%, rgba(168, 85, 247, 0.11), transparent 32%),
+    radial-gradient(ellipse at 40% 62%, rgba(221, 184, 101, 0.06), transparent 26%);
+}
+
+.axs-circuit-lightning-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 0%, transparent 42%, rgba(0, 0, 0, 0.74) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.68), transparent 18%, transparent 80%, rgba(0, 0, 0, 0.72));
+}
+
+.axs-circuit-lightning-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px),
+    radial-gradient(circle at 55% 45%, rgba(255, 255, 255, 0.5) 0 1px, transparent 1px);
+  background-size: 120px 120px, 180px 180px, 260px 260px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axs-circuit-lightning-depth {
+    opacity: 0.22;
+  }
+}

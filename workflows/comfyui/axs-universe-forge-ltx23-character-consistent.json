@@ -1,0 +1,37 @@
+{
+  "id": "axs-universe-forge-ltx23-character-consistent",
+  "version": 1,
+  "model": "ltx-video-2.3",
+  "workflow": "ltx-2.3-character-consistent-directors-cut",
+  "purpose": "Universe Forge full-season generation with Character DNA, FaceLock, wardrobe continuity, and Director's Cut assembly.",
+  "recommended_gpu": "RTX 3080 10GB",
+  "generation": {
+    "resolution": "832x1216",
+    "fps": 16,
+    "steps": 28,
+    "cfg": 4.1,
+    "denoise": 0.92,
+    "duration_seconds": 5,
+    "batch_size": 1
+  },
+  "consistency": {
+    "ip_adapter_strength": 0.86,
+    "facelock_strength": 0.9,
+    "body_reference_lock": 0.78,
+    "controlnet_pose_strength": 0.62,
+    "continuity_passes": ["dna", "wardrobe", "pose", "lighting", "timeline", "audio"]
+  },
+  "director": {
+    "shot_count": "8-20",
+    "camera_language": ["35mm slow push-in", "85mm close-up", "controlled orbit", "match cut"],
+    "stitching": "director-cut",
+    "transition_policy": "preserve wardrobe, hair, lighting direction, and emotional beat order"
+  },
+  "post": {
+    "upscale": "RTX VSR 3840x2160 ULTRA",
+    "interpolation": "RIFE 2x when pacing needs polish",
+    "format": "h264-mp4",
+    "crf": 19,
+    "pix_fmt": "yuv420p"
+  }
+}
