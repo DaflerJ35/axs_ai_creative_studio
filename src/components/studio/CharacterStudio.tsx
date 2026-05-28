@@ -520,11 +520,11 @@ export const CharacterStudio = () => {
               </div>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-white md:text-5xl">Character DNA</h1>
               <p className="mt-3 max-w-4xl text-sm leading-7 text-white/58">
-                Run a cinematic identity assay: face geometry, body profile, style markers, wardrobe anchors, and canon-safe memory across every scene, image, and campaign.
+                Lock identity, style, face geometry, body profile, and continuity memory across every scene, image, and campaign.
               </p>
             </div>
             <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-              {["Genome Lock", "Canon Protected", "FaceLock Assay", "Style Markers Synced"].map((badge) => (
+              {["Identity Lock", "Canon Protected", "FaceLock Ready", "Style Bible Synced"].map((badge) => (
                 <div key={badge} className="rounded-full border border-[#F6D57A]/22 bg-[#D4AF37]/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#F6D57A]">
                   {badge}
                 </div>
@@ -821,7 +821,6 @@ export const CharacterStudio = () => {
           <div className="min-w-0 space-y-5">
             <CharacterContinuityLab
               character={previewCharacter}
-              dnaColors={dnaColors}
               faceLockStrength={faceLockValue}
               bodyReferenceLock={bodyReferenceLock}
               referenceCount={referenceCount}
@@ -903,6 +902,8 @@ export const CharacterStudio = () => {
             )}
           </div>
         </main>
+
+        <CharacterSheetGrid dnaColors={dnaColors} />
       </div>
       {nsfwGateOpen && (
         <LegalGateModal
@@ -963,11 +964,11 @@ function FaceLockHero({
             <div className="min-w-0">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#F6D57A]">
                 <ScanFace className="size-3.5" />
-                Specimen Intake Bay
+                Identity Intake Console
               </div>
-              <h2 className="mt-4 text-2xl font-black tracking-tight text-white">Genetic identity assay</h2>
+              <h2 className="mt-4 text-2xl font-black tracking-tight text-white">Biometric source deck</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-white/52">
-                Load visual specimens, measure identity strength, and seal the canon genome before AXS commits this profile to persistent Character DNA memory.
+                Upload anchor face, body, style, and wardrobe references before AXS commits this profile to persistent Character DNA memory.
               </p>
             </div>
             <div className="hidden shrink-0 rounded-[22px] border border-[#F6D57A]/18 bg-black/42 p-3 shadow-[inset_0_1px_0_rgba(246,213,122,0.10)] sm:block">
@@ -980,18 +981,18 @@ function FaceLockHero({
 
         <div className="relative grid gap-5 p-6">
           <div className="grid gap-3 sm:grid-cols-4">
-            <LabStatPill label="Genome ID" value="LOCAL" />
-            <LabStatPill label="Assay" value={`${Math.round(faceLockValue * 100)}%`} />
-            <LabStatPill label="Specimens" value={`${Object.values(references).filter(Boolean).length}/4`} />
+            <LabStatPill label="Identity ID" value="LOCAL" />
+            <LabStatPill label="FaceLock" value={`${Math.round(faceLockValue * 100)}%`} />
+            <LabStatPill label="References" value={`${Object.values(references).filter(Boolean).length}/4`} />
             <LabStatPill label="Canon" value={bodyReferenceLock && seedLocked ? "SEALED" : "DRAFT"} />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             {([
-              ["face", "Face Sample", "Geometry marker", ScanFace],
-              ["body", "Body Sample", "Silhouette marker", User],
-              ["style", "Style Sample", "Aesthetic marker", ImageIcon],
-              ["outfit", "Wardrobe Sample", "Costume marker", Layers3],
+              ["face", "Anchor Face", "Primary identity", ScanFace],
+              ["body", "Full Body", "Silhouette lock", User],
+              ["style", "Style Reference", "Lighting memory", ImageIcon],
+              ["outfit", "Outfit / Wardrobe", "Wardrobe anchor", Layers3],
             ] as const).map(([slot, label, hint, Icon]) => (
               <label
                 key={slot}
@@ -1018,7 +1019,7 @@ function FaceLockHero({
                 </div>
                 <div className="relative">
                   <div className="text-base font-black text-white">{label}</div>
-                  <div className="mt-1 text-xs font-semibold text-white/46">{references[slot] ? "Specimen active" : hint}</div>
+                  <div className="mt-1 text-xs font-semibold text-white/46">{references[slot] ? "Reference active" : hint}</div>
                 </div>
               </label>
             ))}
@@ -1027,7 +1028,7 @@ function FaceLockHero({
           <div className="rounded-[26px] border border-[#F6D57A]/16 bg-black/46 p-5 shadow-[inset_0_1px_0_rgba(246,213,122,0.10)]">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="text-sm font-black text-white">FaceLock assay strength</div>
+                <div className="text-sm font-black text-white">FaceLock strength</div>
                 <div className="mt-1 text-xs font-semibold text-white/42">{lockLabel}</div>
               </div>
               <motion.div
@@ -1061,7 +1062,7 @@ function FaceLockHero({
               <div className="flex items-center gap-3">
                 <ShieldCheck className={cn("size-5", bodyReferenceLock ? "text-[#F6D57A]" : "text-white/40")} />
                 <div>
-                  <div className="text-sm font-black text-white">Body Marker Lock</div>
+                  <div className="text-sm font-black text-white">Body Lock</div>
                   <div className="text-xs text-white/40">Preserve silhouette, posture, wardrobe proportions.</div>
                 </div>
               </div>
@@ -1081,7 +1082,7 @@ function FaceLockHero({
               <div className="flex items-center gap-3">
                 <Dna className={cn("size-5", seedLocked ? "text-[#F6D57A]" : "text-white/40")} />
                 <div>
-                  <div className="text-sm font-black text-white">Genome Seed Lock</div>
+                  <div className="text-sm font-black text-white">Seed Lock</div>
                   <div className="text-xs text-white/40">Keep the same identity fingerprint across outputs.</div>
                 </div>
               </div>
@@ -1185,7 +1186,7 @@ function LivePreview({
         <div>
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-[#F6D57A]/72">
             <Eye className="size-4" />
-            Bio Scan Chamber
+            Identity Preview / Scan Chamber
           </div>
           <h2 className="mt-3 text-4xl font-black tracking-tight text-white">
             {character.name || (activeCharacter ? activeCharacter.name : "No locked identity yet")}
@@ -1205,10 +1206,10 @@ function LivePreview({
         <div className="relative overflow-hidden rounded-[34px] border border-[#F6D57A]/22 bg-black/54 shadow-[inset_0_1px_0_rgba(246,213,122,0.11),0_24px_72px_rgba(0,0,0,0.42),0_0_70px_rgba(212,175,55,0.10)]">
           <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(rgba(246,213,122,0.08)_1px,transparent_1px)] bg-[size:100%_42px] opacity-35" />
           <div className="pointer-events-none absolute left-5 top-5 z-10 rounded-full border border-[#F6D57A]/18 bg-black/44 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#F6D57A]/76">
-            assay scan
+            identity proof
           </div>
           <div className="pointer-events-none absolute right-5 top-5 z-10 rounded-full border border-[#F6D57A]/18 bg-black/44 px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#F6D57A]/76">
-            genome memory
+            canon lock
           </div>
           <div className="aspect-[5/6]">
             {activeCharacter?.portraitDataUrl && previewImageReady ? (
@@ -1240,12 +1241,12 @@ function LivePreview({
                       ? "Loading selected character"
                       : character.name
                         ? lockLabel
-                        : "No genome locked yet"}
+                        : "No locked identity yet"}
                   </div>
                   <div className="mx-auto mt-3 max-w-md text-sm leading-7 text-white/44">
                     {activeCharacter?.portraitDataUrl && !previewImageReady
                       ? "Clearing the previous preview and preparing this character's portrait."
-                      : character.description || "Load visual specimens or complete the identity deck to generate a persistent Character DNA profile."}
+                      : character.description || "Upload references or complete the identity deck to generate a persistent Character DNA profile."}
                   </div>
                 </div>
               </motion.div>
@@ -1272,7 +1273,7 @@ function LivePreview({
 
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px]">
           <div className="rounded-[28px] border border-[#F6D57A]/14 bg-black/30 p-5 shadow-[inset_0_1px_0_rgba(246,213,122,0.08)]">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Genome Prompt Memory</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Prompt Memory Summary</div>
             <p className="mt-3 max-h-56 overflow-y-auto text-sm leading-7 text-white/58">
               {prompt || "Start typing identity details to build the character prompt."}
             </p>
@@ -1280,9 +1281,10 @@ function LivePreview({
           <div className="grid gap-3">
             <Metric label="Heritage" value={character.heritage} />
             <Metric label="Body" value={character.bodyType} />
-            <Metric label="Face Assay" value={safeFaceLockStrength.toFixed(2)} />
-            <Metric label="Specimens" value={`${referenceCount}/4 active`} />
-            <Metric label="Body Marker" value={bodyReferenceLock ? "Locked" : "Off"} />
+            <Metric label="FaceLock" value={safeFaceLockStrength.toFixed(2)} />
+            <Metric label="References" value={`${referenceCount}/4 active`} />
+            <Metric label="Body Lock" value={bodyReferenceLock ? "Enabled" : "Off"} />
+            <Metric label="Character Seed" value={String(character.seed)} mono />
           </div>
         </div>
       </div>
@@ -1333,39 +1335,34 @@ function LivePreview({
 
 function CharacterContinuityLab({
   character,
-  dnaColors,
   faceLockStrength,
   bodyReferenceLock,
   referenceCount,
   prompt,
 }: {
   character: Omit<Character, "id" | "createdAt"> | Character;
-  dnaColors: string[];
   faceLockStrength: number;
   bodyReferenceLock: boolean;
   referenceCount: number;
   prompt: string;
 }) {
-  const poses = ["Stand", "Walk", "Sit", "Action", "Interact"];
-  const expressions = ["Neutral", "Happy", "Sad", "Angry", "Surprised", "Worried"];
   const audit = [
-    ["Face geometry assay", faceLockStrength >= 0.78 ? "Locked" : "Missing"],
-    ["Body marker assay", bodyReferenceLock ? "Preserved" : "Missing"],
-    ["Wardrobe marker", referenceCount >= 4 ? "Locked" : "Incomplete"],
-    ["Expression phenotype", "Mapped"],
-    ["Specimen slots", `${referenceCount}/4 active`],
-    ["Genome seed", String(character.seed)],
-    ["Canon seal", faceLockStrength >= 0.78 && bodyReferenceLock ? "Protected" : "Draft"],
+    ["Face geometry", faceLockStrength >= 0.78 ? "Locked" : "Missing"],
+    ["Body silhouette", bodyReferenceLock ? "Preserved" : "Missing"],
+    ["Wardrobe anchors", referenceCount >= 4 ? "Locked" : "Incomplete"],
+    ["Expression range", "Mapped"],
+    ["Seed memory", String(character.seed)],
+    ["Canon status", faceLockStrength >= 0.78 && bodyReferenceLock ? "Protected" : "Draft"],
   ];
 
   return (
     <GlassPanel className="p-7">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#F6D57A]/66">Genome Proof Matrix</div>
-          <h3 className="mt-2 text-3xl font-black text-white">Canon-safe genotype</h3>
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#F6D57A]/66">Style Bible / Continuity Proof</div>
+          <h3 className="mt-2 text-3xl font-black text-white">Canon-safe profile</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">
-            Biometric proof cards, phenotype slots, expression range, FaceLock assay, body marker lock, and reusable DNA memory.
+            Prompt memory, FaceLock strength, body lock, reference anchors, and reusable Character DNA continuity.
           </p>
         </div>
         <div className="rounded-full border border-[#F6D57A]/24 bg-[#D4AF37]/10 px-4 py-2 text-xs font-black text-[#F6D57A]">
@@ -1375,14 +1372,23 @@ function CharacterContinuityLab({
 
       <div className="space-y-5">
         <div className="rounded-[28px] border border-[#F6D57A]/14 bg-black/28 p-5">
-          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Genome Prompt Memory</div>
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Prompt Memory</div>
           <p className="mt-3 max-h-36 overflow-y-auto text-sm leading-7 text-white/56">
             {prompt || "No prompt memory yet. Complete the identity deck to create persistent DNA."}
           </p>
         </div>
 
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Metric label="Heritage" value={character.heritage} />
+          <Metric label="Body" value={character.bodyType} />
+          <Metric label="FaceLock" value={faceLockStrength.toFixed(2)} />
+          <Metric label="References" value={`${referenceCount}/4 active`} />
+          <Metric label="Body Lock" value={bodyReferenceLock ? "Enabled" : "Off"} />
+          <Metric label="Seed Memory" value={String(character.seed)} mono />
+        </div>
+
         <div className="rounded-[30px] border border-[#F6D57A]/12 bg-black/24 p-5">
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-white/34">Assay Checklist</div>
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-white/34">Continuity Checklist</div>
           <div className="mt-4 grid gap-3">
             {audit.map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-3 rounded-[20px] border border-white/[0.08] bg-white/[0.035] px-4 py-3">
@@ -1392,23 +1398,48 @@ function CharacterContinuityLab({
             ))}
           </div>
         </div>
+      </div>
+    </GlassPanel>
+  );
+}
 
+function CharacterSheetGrid({ dnaColors }: { dnaColors: string[] }) {
+  const poses = ["Stand", "Walk", "Sit", "Action", "Interact"];
+  const expressions = ["Neutral", "Happy", "Sad", "Angry", "Surprised", "Worried"];
+
+  return (
+    <GlassPanel className="mt-5 p-7">
+      <div className="mb-6">
+        <div className="text-xs font-black uppercase tracking-[0.2em] text-[#F6D57A]/66">Character Sheet + Expression Grid</div>
+        <h3 className="mt-2 text-3xl font-black text-white">Identity slot library</h3>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-white/48">
+          Continuity-ready pose and expression anchors for scene, image, and campaign reuse.
+        </p>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1.05fr]">
         <div className="grid gap-3">
-          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Phenotype Sheet</div>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Mini Character Sheet</div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {poses.map((pose, index) => (
-              <div key={pose} className="min-h-24 rounded-[22px] border border-[#F6D57A]/12 bg-black/30 p-3">
-                <div className="h-12 rounded-2xl" style={{ background: `linear-gradient(135deg, ${dnaColors[index % dnaColors.length]}, rgba(255,255,255,0.08))` }} />
+              <div key={pose} className="min-h-28 rounded-[22px] border border-[#F6D57A]/12 bg-black/30 p-3 shadow-[inset_0_1px_0_rgba(246,213,122,0.06)]">
+                <div
+                  className="h-12 rounded-2xl border border-[#F6D57A]/12"
+                  style={{ background: `linear-gradient(135deg, ${dnaColors[index % dnaColors.length]}33, rgba(255,255,255,0.035))` }}
+                />
                 <div className="mt-3 text-xs font-black text-white">{pose}</div>
-                <div className="mt-1 text-[10px] font-semibold text-white/34">marker slot</div>
+                <div className="mt-1 text-[10px] font-semibold text-white/34">identity slot</div>
               </div>
             ))}
           </div>
-          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Expression Phenotype Grid</div>
-          <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+        </div>
+
+        <div className="grid gap-3">
+          <div className="text-xs font-black uppercase tracking-[0.18em] text-white/34">Expression Grid</div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
             {expressions.map((expression, index) => (
-              <div key={expression} className="rounded-[20px] border border-[#F6D57A]/12 bg-white/[0.035] px-3 py-3 text-center">
-                <div className="mx-auto size-7 rounded-full" style={{ backgroundColor: dnaColors[index % dnaColors.length] }} />
+              <div key={expression} className="rounded-[20px] border border-[#F6D57A]/12 bg-white/[0.035] px-3 py-3 text-center shadow-[inset_0_1px_0_rgba(246,213,122,0.06)]">
+                <div className="mx-auto size-7 rounded-full border border-[#F6D57A]/20" style={{ backgroundColor: `${dnaColors[index % dnaColors.length]}66` }} />
                 <div className="mt-2 text-[11px] font-black text-white/72">{expression}</div>
               </div>
             ))}
